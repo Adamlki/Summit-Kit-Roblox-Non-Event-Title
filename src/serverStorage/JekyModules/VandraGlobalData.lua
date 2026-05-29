@@ -1,6 +1,6 @@
 -- ServerStorage/JekyModules/VandraGlobalData
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local PS = require(ReplicatedStorage:WaitForChild("JekyProfile"):WaitForChild("ProfileServiceJeky"))
+local PS = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("JekyProfile"):WaitForChild("ProfileServiceJeky"))
 local VandraGlobalData = {}
 function VandraGlobalData:Initialize()  PS.Config.Load(); return true end
 function VandraGlobalData:LoadConfig()  PS.Config.Load() end

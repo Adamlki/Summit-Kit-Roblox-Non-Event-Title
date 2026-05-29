@@ -4,7 +4,7 @@ local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
  
 local PS = require(
-ReplicatedStorage:WaitForChild("JekyProfile"):WaitForChild("ProfileServiceJeky")
+ReplicatedStorage:WaitForChild("Shared"):WaitForChild("JekyProfile"):WaitForChild("ProfileServiceJeky")
 )
  
 local VandraDataStore = {}

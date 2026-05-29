@@ -8,8 +8,12 @@ local ApplyEvent = RS:WaitForChild("ApplyCustomTitle")
 local ADMINS = {"adamzz3372","",""}
 if not table.find(ADMINS, Player.Name) then return end
  
-local StarterGui = Player:WaitForChild("PlayerGui"):WaitForChild("ListGui")
-local toggleBtn = StarterGui:WaitForChild("TitleButton")
+local playerGui = Player:WaitForChild("PlayerGui")
+
+-- Langsung tunggu ListGui di luar, karena wujud aslinya memang ada di luar
+local listGui = playerGui:WaitForChild("ListGui")
+
+local toggleBtn = listGui:WaitForChild("TitleButton")
 toggleBtn.Visible = true
  
 local PRESETS = {

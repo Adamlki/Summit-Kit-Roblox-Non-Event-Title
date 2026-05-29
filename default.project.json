@@ -24,8 +24,8 @@
     },
     
     "ServerStorage": {
-      "Modules": {
-        "$path": "src/serverStorage"
+      "JekyModules": {
+        "$path": "src/serverStorage/JekyModules"
       }
     },
 

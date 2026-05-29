@@ -12,8 +12,7 @@ ApplyEvent.Parent = RS
 local TitleGiver = RS:WaitForChild("TitleGiver")
 
 -- Memanggil module VandraConfig untuk cek akses Admin
-local VandraConfig = require(ServerStorage:WaitForChild("Modules"):WaitForChild("JekyModules"):WaitForChild("VandraConfig"))
-
+local VandraConfig = require(ServerStorage:WaitForChild("JekyModules"):WaitForChild("VandraConfig"))
 local PRESETS = {
 	{Colors = {Color3.fromRGB(0, 255, 255), Color3.fromRGB(180, 0, 255), Color3.fromRGB(255, 215, 0), Color3.fromRGB(255, 105, 180)}},
 	{Colors = {Color3.fromRGB(0, 0, 255), Color3.fromRGB(255, 0, 0), Color3.fromRGB(255, 255, 0)}},

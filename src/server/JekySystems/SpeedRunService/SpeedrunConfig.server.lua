@@ -8,7 +8,7 @@ local VandraSpeedRunData       = require(ServerStorage.JekyModules:WaitForChild(
 local VandraConfig             = require(ServerStorage.JekyModules:WaitForChild("VandraConfig"))
 local VandraTitle              = require(ServerStorage.JekyModules:WaitForChild("VandraTitle"))
 local VandraBoardConfiguration = require(ServerStorage.JekyModules:WaitForChild("VandraBoardConfiguration"))
-local PS = require(ReplicatedStorage:WaitForChild("JekyProfile"):WaitForChild("ProfileServiceJeky"))
+local PS = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("JekyProfile"):WaitForChild("ProfileServiceJeky"))
 
 local CONFIG = {
 GLOBAL_UPDATE_INTERVAL  = 60,
