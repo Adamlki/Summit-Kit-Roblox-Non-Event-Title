@@ -44,6 +44,8 @@ local minusHolding = false
 local holdConnection = nil
  
 local hiddenAuras = {}
+local allMapEffects = {}
+local hasScannedEffects = false
  
 -- ============================================================
 -- SHIFT LOCK SETTINGS
@@ -167,41 +169,60 @@ local function toggleShadow(hide)
     end
 end
  
+-- Fungsi khusus untuk scan map SATU KALI saja
+local function scanMapEffects()
+    if hasScannedEffects then return end
+    
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam") or obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") then
+            -- Simpan objeknya dan status aslinya (apakah awalnya nyala atau mati)
+            table.insert(allMapEffects, {
+                object = obj,
+                originalState = obj.Enabled
+            })
+        end
+    end
+    hasScannedEffects = true
+end
+
 local function applyGraphicMode(isLow)
+    -- Pastikan map di-scan dulu (Hanya berjalan di klik pertama)
+    if not hasScannedEffects then
+        scanMapEffects()
+    end
+
     if not isLow then
+        -- [HIGH GRAPHIC] Kembalikan settingan map dan aura
         for key, value in pairs(originalLightingSettings) do
             pcall(function() Lighting[key] = value end)
+        end
+        
+        for _, p in pairs(Players:GetPlayers()) do
+            if p.Character then restoreAurasToCharacter(p.Character) end
+        end
+        
+        -- Nyalakan kembali semua efek visual di map secara instan
+        for _, data in ipairs(allMapEffects) do
+            if data.object and data.object.Parent then
+                pcall(function() data.object.Enabled = data.originalState end)
             end
-                for _, p in pairs(Players:GetPlayers()) do
-                    if p.Character then restoreAurasToCharacter(p.Character) end
-                end
-            else
-                pcall(function() Lighting.GlobalShadows = false end)
-                    pcall(function() Lighting.Brightness = 2 end)
-                        pcall(function() Lighting.EnvironmentDiffuseScale = 0.5 end)
-                            pcall(function() Lighting.EnvironmentSpecularScale = 0.5 end)
-                                for _, p in pairs(Players:GetPlayers()) do
-                                    if p.Character then removeAurasFromCharacter(p.Character, true) end
-                                end
-                            end
-                        end
-                        
-                        local function toggleHideAura(hide)
-                            if hide then
-                                for _, p in pairs(Players:GetPlayers()) do
-                                    if p ~= player and p.Character then
-                                        removeAurasFromCharacter(p.Character, false)
-                                    end
-                                end
-                            else
-                                for _, p in pairs(Players:GetPlayers()) do
-                                    if p ~= player and p.Character then
-                                        restoreAurasToCharacter(p.Character)
-                                    end
-                                end
-                            end
-                        end
-                        
+        end
+    else
+        -- [LOW GRAPHIC] Matikan Shadow & Aura
+        pcall(function() Lighting.GlobalShadows = false end)
+        
+        for _, p in pairs(Players:GetPlayers()) do
+            if p.Character then removeAurasFromCharacter(p.Character, true) end
+        end
+        
+        -- Matikan semua efek visual di map secara instan
+        for _, data in ipairs(allMapEffects) do
+            if data.object and data.object.Parent then
+                pcall(function() data.object.Enabled = false end)
+            end
+        end
+    end
+end
                         -- ============================================================
                         -- JUMP BUTTON SYSTEM
                         -- ============================================================

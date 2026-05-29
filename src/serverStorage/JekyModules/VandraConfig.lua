@@ -11,86 +11,26 @@ VandraConfig.SPEEDRUN_MIN_TIME   = 5
 VandraConfig.SKIP_CHECKPOINT     = false
  
 VandraConfig.SUMMIT_REWARDS = {
-Summit     = 5,
-ApexSummit = 200
+	Summit     = 5,
+	ApexSummit = 200
 }
  
--- FIX: Tambah _RSpeed ke COMMAND_ACCESS
--- Sebelumnya tidak ada entry _RSpeed sehingga HasCommandAccess selalu return false
--- dan reset speedrun tidak pernah bisa jalan
+-- Jauh lebih ringkas! Hanya tulis perintah yang diizinkan (true).
+-- Jika role atau perintah tidak tertulis, sistem otomatis menganggapnya "false" (tidak punya akses).
 VandraConfig.COMMAND_ACCESS = {
-Owner = {
-_Add         = true,
-_R           = true,
-_Value       = true,
-_Gift        = true,
-_DVip        = true,
-_AddVerified = true,
-_DVerified   = true,
-_AddRole     = true,
-_RemoveRole  = true,
-_RSpeed      = true,   -- FIX: reset speedrun
-},
-Developer = {
-_Add         = true,
-_R           = true,
-_Value       = true,
-_Gift        = true,
-_DVip        = true,
-_AddVerified = true,
-_DVerified   = true,
-_AddRole     = true,
-_RemoveRole  = true,
-_RSpeed      = true,   -- FIX
-},
-HeadAdmin = {
-_Add         = true,
-_R           = true,
-_Value       = false,
-_Gift        = true,
-_DVip        = true,
-_AddVerified = true,
-_DVerified   = true,
-_AddRole     = false,
-_RemoveRole  = false,
-_RSpeed      = true,   -- FIX
-},
-Admin = {
-_Add         = false,
-_R           = false,
-_Value       = false,
-_Gift        = false,
-_DVip        = false,
-_AddVerified = false,
-_DVerified   = false,
-_AddRole     = false,
-_RemoveRole  = false,
-_RSpeed      = false,
-},
-Moderator = {
-_Add         = false,
-_R           = false,
-_Value       = false,
-_Gift        = false,
-_DVip        = false,
-_AddVerified = false,
-_DVerified   = false,
-_AddRole     = false,
-_RemoveRole  = false,
-_RSpeed      = false,
-},
-Streamer = {
-_Add         = false,
-_R           = false,
-_Value       = false,
-_Gift        = false,
-_DVip        = false,
-_AddVerified = false,
-_DVerified   = false,
-_AddRole     = false,
-_RemoveRole  = false,
-_RSpeed      = false,
-},
+	Owner = {
+		_Add = true, _R = true, _Value = true, _Gift = true, _DVip = true,
+		_AddVerified = true, _DVerified = true, _AddRole = true, _RemoveRole = true, _RSpeed = true
+	},
+	Developer = {
+		_Add = true, _R = true, _Value = true, _Gift = true, _DVip = true,
+		_AddVerified = true, _DVerified = true, _AddRole = true, _RemoveRole = true, _RSpeed = true
+	},
+	HeadAdmin = {
+		_Add = true, _R = true, _Gift = true, _DVip = true,
+		_AddVerified = true, _DVerified = true, _RSpeed = true
+	}
+	-- Admin, Moderator, dan Streamer tidak perlu ditulis karena tidak punya akses sama sekali
 }
  
 game:GetService("Players").RespawnTime = 2
@@ -139,9 +79,13 @@ end
 function VandraConfig:HasCommandAccess(roleTitle, commandName)
     if not roleTitle or roleTitle == "" then return false end
     local roleAccess = self.COMMAND_ACCESS[roleTitle]
-    if not roleAccess then return false end
-    return roleAccess[commandName] == true
+	
+	-- Tambahan validasi: Pastikan role tersebut memang terdaftar di table
+    if type(roleAccess) == "table" then
+        return roleAccess[commandName] == true
+    end
+	
+    return false
 end
  
 return VandraConfig
-

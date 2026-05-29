@@ -126,9 +126,9 @@ carryBind.Event:Connect(carry)
 stopCarryBind.Event:Connect(stopCarry)
  
 --- === TAMBAHKAN PILIHAN MENU KE AVATAR CONTEXT MENU ===
-StarterGui:SetCore("AddAvatarContextMenuOption", {"PUNGUT", carryBind})
-StarterGui:SetCore("AddAvatarContextMenuOption", {"BUANG", stopCarryBind})
-StarterGui:SetCore("AddAvatarContextMenuOption", {"ZEYA CANTIK", syncBind})
-StarterGui:SetCore("AddAvatarContextMenuOption", {"MEDELLINE AREA", unsyncBind})
+StarterGui:SetCore("AddAvatarContextMenuOption", {"Carry", carryBind})
+StarterGui:SetCore("AddAvatarContextMenuOption", {"Stop Carry", stopCarryBind})
+StarterGui:SetCore("AddAvatarContextMenuOption", {"Sync Dance", syncBind})
+StarterGui:SetCore("AddAvatarContextMenuOption", {"Unsync Dance", unsyncBind})
  
 
