@@ -1,0 +1,33 @@
+-- ServerStorage/VandraModules/VandraVerified
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local PS = require(ReplicatedStorage:WaitForChild("VandraProfile"):WaitForChild("ProfileServiceVandra"))
+local VandraVerified = {}
+VandraVerified.AutoVerifyRoles    = true
+VandraVerified.AlwaysVerifiedUsers= { "BukanYgDiaPilih","","kenn_justforu","TemanBaik" }
+VandraVerified.WishlistUsers      = { "PlayerMenunggu1","PlayerMenunggu2" }
+function VandraVerified:Initialize()                PS.Verified.Load(); return true end
+function VandraVerified:IsInAlwaysVerified(u)
+    if not u then return false end; local l=string.lower(u)
+        for _,v in ipairs(self.AlwaysVerifiedUsers) do if string.lower(v)==l then return true end end; return false end
+        function VandraVerified:IsInWishlist(u)
+            if not u then return false end; local l=string.lower(u)
+                for _,v in ipairs(self.WishlistUsers) do if string.lower(v)==l then return true end end; return false end
+                function VandraVerified:AddDynamicVerified(u,by,r) return PS.Verified.Add(u,by,r) end
+                function VandraVerified:RemoveDynamicVerified(u)   return PS.Verified.Remove(u)   end
+                function VandraVerified:IsInDynamicVerified(u)     return PS.Verified.Check(u)    end
+                function VandraVerified:CheckPlayer(player, roleTitle)
+                    if not player then return false end
+                    local u = player.Name
+                    if self:IsInAlwaysVerified(u) then return true end
+                    if self:IsInDynamicVerified(u) then return true end
+                    if self.AutoVerifyRoles and roleTitle and roleTitle ~= "" then return true end
+                    if self:IsInWishlist(u) then self:AddDynamicVerified(u,"AutoSystem","Auto from wishlist"); return true end
+                    return false
+                end
+                function VandraVerified:GetAllVerifiedUsers()
+                    local list=PS.Verified.Load(); local dyn={}
+                    for _,e in ipairs(list) do table.insert(dyn,{username=e.username,addedBy=e.addedBy,reason=e.reason}) end
+                    return { module=self.AlwaysVerifiedUsers, dynamic=dyn, wishlist=self.WishlistUsers }
+                end
+                return VandraVerified
+
