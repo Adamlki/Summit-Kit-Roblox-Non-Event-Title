@@ -1,4 +1,4 @@
--- ServerStorage/JekyModules/VandraDataStore
+-- ServerStorage/JekyModules/JekyDataStore
 local DataStoreService  = game:GetService("DataStoreService")
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -7,9 +7,9 @@ local PS = require(
 ReplicatedStorage:WaitForChild("Shared"):WaitForChild("JekyProfile"):WaitForChild("ProfileServiceJeky")
 )
  
-local VandraDataStore = {}
+local JekyDataStore = {}
  
-function VandraDataStore:Initialize()
+function JekyDataStore:Initialize()
     PS.Config.Load()
     task.spawn(function()
         while true do task.wait(30); PS.GlobalLB.Get(100) end
@@ -28,41 +28,41 @@ local function wrap(d)
     }
 end
  
-function VandraDataStore:LoadProfile(userId, forceLoad)
+function JekyDataStore:LoadProfile(userId, forceLoad)
     local p = PS.Profile.Load(userId, forceLoad)
     return p and wrap(p.data) or nil
 end
  
-function VandraDataStore:GetProfile(userId)
+function JekyDataStore:GetProfile(userId)
     return wrap(PS.Profile.Get(userId))
 end
  
-function VandraDataStore:SaveProfile(userId, release)
+function JekyDataStore:SaveProfile(userId, release)
     if release then return PS.Profile.Release(userId) end
     return PS.Profile.Save(userId, false)
 end
  
-function VandraDataStore:UpdateCheckpoint(userId, cpId)
+function JekyDataStore:UpdateCheckpoint(userId, cpId)
     local d = PS.Profile.Get(userId); if not d then return false end
     d.CurrentCheckpoint = cpId; d.VisitedCheckpoints[cpId] = true; return true
 end
  
-function VandraDataStore:UpdateVisitedCheckpoints(userId, visited)
+function JekyDataStore:UpdateVisitedCheckpoints(userId, visited)
     local d = PS.Profile.Get(userId); if not d then return false end
     d.VisitedCheckpoints = visited; return true
 end
  
-function VandraDataStore:UpdateSummit(userId, amount)
+function JekyDataStore:UpdateSummit(userId, amount)
     local d = PS.Profile.Get(userId); if not d then return false end
     d.TotalSummit = d.TotalSummit + amount; return true
 end
  
-function VandraDataStore:IncrementDeaths(userId)
+function JekyDataStore:IncrementDeaths(userId)
     local d = PS.Profile.Get(userId); if not d then return false end
     d.TotalDeaths = (d.TotalDeaths or 0) + 1; return true
 end
  
-function VandraDataStore:ForceUpdateSummit(userId, newTotal)
+function JekyDataStore:ForceUpdateSummit(userId, newTotal)
     local d = PS.Profile.Get(userId)
     if d then
         d.TotalSummit = newTotal
@@ -92,23 +92,23 @@ end
 -- ============================================================
 -- GLOBAL LB
 -- ============================================================
-function VandraDataStore:UpdateGlobalLeaderboardEntry(userId, username, total)
+function JekyDataStore:UpdateGlobalLeaderboardEntry(userId, username, total)
     return PS.GlobalLB.Update(userId, username, total)
 end
-function VandraDataStore:GetGlobalLeaderboard(max)
+function JekyDataStore:GetGlobalLeaderboard(max)
     return PS.GlobalLB.Get(max or 100)
 end
-function VandraDataStore:ForceRefreshGlobalLeaderboard()
+function JekyDataStore:ForceRefreshGlobalLeaderboard()
     return PS.GlobalLB.Get(100)
 end
-function VandraDataStore:GetPlayerGlobalRank(userId)
+function JekyDataStore:GetPlayerGlobalRank(userId)
     local _, data = PS.GlobalLB.Get(100)
     for rank, e in ipairs(data) do
         if e.UserId == userId then return rank end
     end
     return nil
 end
-function VandraDataStore:GetRequestBudget()
+function JekyDataStore:GetRequestBudget()
     local ok, v = pcall(function()
         return DataStoreService:GetRequestBudgetForRequestType(
         Enum.DataStoreRequestType.UpdateAsync)
@@ -116,5 +116,5 @@ function VandraDataStore:GetRequestBudget()
     return ok and v or 0
 end
  
-return VandraDataStore
+return JekyDataStore
 

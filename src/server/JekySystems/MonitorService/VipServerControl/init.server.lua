@@ -5,9 +5,9 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local ServerStorage      = game:GetService("ServerStorage")
 local ReplicatedStorage  = game:GetService("ReplicatedStorage")
  
-local VandraTitle   = require(ServerStorage:WaitForChild("JekyModules"):WaitForChild("VandraTitle"))
-local VandraConfig  = require(ServerStorage:WaitForChild("JekyModules"):WaitForChild("VandraConfig"))
-local VandraVipData = require(ServerStorage:WaitForChild("JekyModules"):WaitForChild("VandraVipData"))
+local JekyTitle   = require(ServerStorage:WaitForChild("JekyModules"):WaitForChild("JekyTitle"))
+local JekyConfig  = require(ServerStorage:WaitForChild("JekyModules"):WaitForChild("JekyConfig"))
+local JekyVipData = require(ServerStorage:WaitForChild("JekyModules"):WaitForChild("JekyVipData"))
  
 -- ============================================================
 -- CONFIG 
@@ -87,7 +87,7 @@ local function setVipStatus(player, isVip)
     player:SetAttribute("HasVipTitle", isVip)
     player:SetAttribute("HasVipAura",  isVip)
     
-    VandraVipData:Save(player.UserId, isVip)
+    JekyVipData:Save(player.UserId, isVip)
     
     pcall(function()
         RE_UpdateVipStatus:FireClient(player, { hasVip = isVip })
@@ -116,11 +116,11 @@ local function initPlayer(player)
         end)
         if ok then ownsPass = result end
         
-        local storedVip = VandraVipData:Load(userId)
+        local storedVip = JekyVipData:Load(userId)
         local isVip     = ownsPass or storedVip
         
         if ownsPass and not storedVip then
-            VandraVipData:Save(userId, true)
+            JekyVipData:Save(userId, true)
         end
         
         setVipStatus(player, isVip)
@@ -146,14 +146,14 @@ Players.PlayerAdded:Connect(function(player)
     
     -- Chat commands
     player.Chatted:Connect(function(message)
-        local roleTitle = VandraTitle.GetRoleTitle(player)
+        local roleTitle = JekyTitle.GetRoleTitle(player)
         if not roleTitle then return end
         
         local parts   = message:split(" ")
         local command = parts[1]
         
         if command == "_Gift" and parts[2] then
-            if not VandraConfig:HasCommandAccess(roleTitle, "_Gift") then return end
+            if not JekyConfig:HasCommandAccess(roleTitle, "_Gift") then return end
             local targetName = parts[2]
             for _, p in ipairs(Players:GetPlayers()) do
                 if string.lower(p.Name) == string.lower(targetName)
@@ -164,7 +164,7 @@ Players.PlayerAdded:Connect(function(player)
             end
             
         elseif command == "_DVip" and parts[2] then
-            if not VandraConfig:HasCommandAccess(roleTitle, "_DVip") then return end
+            if not JekyConfig:HasCommandAccess(roleTitle, "_DVip") then return end
             local targetName = parts[2]
             for _, p in ipairs(Players:GetPlayers()) do
                 if string.lower(p.Name) == string.lower(targetName)
@@ -179,7 +179,7 @@ end)
  
 Players.PlayerRemoving:Connect(function(player)
     local isVip = player:GetAttribute("HasVipTitle") == true
-    VandraVipData:SaveOnLeave(player.UserId, isVip)
+    JekyVipData:SaveOnLeave(player.UserId, isVip)
 end)
  
 -- ============================================================
@@ -196,7 +196,7 @@ MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, passI
     if not purchased or passId ~= VIP_GAMEPASS_ID then return end
     if not player or not player.Parent then return end
     task.wait(1)
-    VandraVipData:Save(player.UserId, true)
+    JekyVipData:Save(player.UserId, true)
     setVipStatus(player, true)
 end)
  

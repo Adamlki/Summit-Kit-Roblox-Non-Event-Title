@@ -230,7 +230,7 @@ local function setupGUI()
 end
 
 local function setupCheckpointFolder()
-    local vandra = workspace:WaitForChild("AllPartSummitkitVandra", 10)
+    local vandra = workspace:WaitForChild("AllPartSummitkitJeky", 10)
     if not vandra then return false end
     CheckpointFolder = vandra:WaitForChild("Checkpoint", 5)
     if not CheckpointFolder then return false end

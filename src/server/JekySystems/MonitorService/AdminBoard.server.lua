@@ -1,19 +1,19 @@
 -- ServerScriptService / VandraAdminBoard
--- Requires: VandraTitle, VandraBoardConfiguration in ServerStorage/JekyModules
+-- Requires: JekyTitle, JekyBoardConfiguration in ServerStorage/JekyModules
 
 local Players           = game:GetService("Players")
 local ServerStorage     = game:GetService("ServerStorage")
 local HttpService       = game:GetService("HttpService")
 
 local Modules           = ServerStorage:WaitForChild("JekyModules")
-local VandraTitle       = require(Modules:WaitForChild("VandraTitle"))
-local BoardConfig       = require(Modules:WaitForChild("VandraBoardConfiguration"))
+local JekyTitle       = require(Modules:WaitForChild("JekyTitle"))
+local BoardConfig       = require(Modules:WaitForChild("JekyBoardConfiguration"))
 
 -- ============================================================
 -- PATH
 -- ============================================================
 local Board = workspace
-:WaitForChild("AllPartSummitkitVandra")
+:WaitForChild("AllPartSummitkitJeky")
 :WaitForChild("LeaderBoard")
 :WaitForChild("AdminBoard")
 :WaitForChild("Board")
@@ -76,9 +76,9 @@ end
 local entries = {}      -- { roleName, userId, cachedDisplay, cachedThumb }
 local userIdToEntry = {} -- userId -> entry (for quick lookup)
 
-for _, roleName in ipairs(VandraTitle.RoleOrder) do
+for _, roleName in ipairs(JekyTitle.RoleOrder) do
     if BoardConfig:CanShowOnAdminBoard(roleName) then
-        local rule = VandraTitle.RoleRules[roleName]
+        local rule = JekyTitle.RoleRules[roleName]
         if rule then
             local seen = {}
             
@@ -146,8 +146,8 @@ local function buildFrame(entry, order)
     -- Role label
     local roleLabel = frame:FindFirstChild("Role")
     if roleLabel then
-        roleLabel.Text = VandraTitle.GetRoleDisplayText(entry.roleName)
-        local col = VandraTitle.GetRoleColor(entry.roleName)
+        roleLabel.Text = JekyTitle.GetRoleDisplayText(entry.roleName)
+        local col = JekyTitle.GetRoleColor(entry.roleName)
         if col then roleLabel.TextColor3 = col end
     end
     

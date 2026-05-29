@@ -14,11 +14,11 @@ local MessagingService  = game:GetService("MessagingService")
 -- ============================================================
 local JekyModules = ServerStorage:WaitForChild("JekyModules")
  
-local VandraTitle    = require(JekyModules:WaitForChild("VandraTitle"))
-local VandraConfig   = require(JekyModules:WaitForChild("VandraConfig"))
-local VandraVerified = require(JekyModules:WaitForChild("VandraVerified"))
-local VandraVipData  = require(JekyModules:WaitForChild("VandraVipData"))
-local VandraDataStore= require(JekyModules:WaitForChild("VandraDataStore"))
+local JekyTitle    = require(JekyModules:WaitForChild("JekyTitle"))
+local JekyConfig   = require(JekyModules:WaitForChild("JekyConfig"))
+local JekyVerified = require(JekyModules:WaitForChild("JekyVerified"))
+local JekyVipData  = require(JekyModules:WaitForChild("JekyVipData"))
+local JekyDataStore= require(JekyModules:WaitForChild("JekyDataStore"))
  
 -- ============================================================
 -- REMOTES SETUP
@@ -57,15 +57,15 @@ local PANEL_ALLOWED = { Owner=true, Developer=true, HeadAdmin=true, Admin=true, 
  
 local function canUsePanel(player)
     if not player or not player.Parent then return false end
-    local role = VandraTitle.GetRoleTitle(player)
+    local role = JekyTitle.GetRoleTitle(player)
     if not role then return false end
     return PANEL_ALLOWED[role] == true
 end
  
 local function hasAccess(player, cmd)
-    local role = VandraTitle.GetRoleTitle(player)
+    local role = JekyTitle.GetRoleTitle(player)
     if not role then return false end
-    return VandraConfig:HasCommandAccess(role, cmd)
+    return JekyConfig:HasCommandAccess(role, cmd)
 end
  
 -- ============================================================
@@ -88,7 +88,7 @@ end
 local INTERNAL_TO_MODEL = { Summit = "SUMMIT", ApexSummit = "BIGSUMMIT" }
  
 local function getCheckpointSpawn(checkpointId)
-    local vandra = workspace:FindFirstChild("AllPartSummitkitVandra")
+    local vandra = workspace:FindFirstChild("AllPartSummitkitJeky")
     if not vandra then return nil end
     local cpFolder = vandra:FindFirstChild("Checkpoint")
     if not cpFolder then return nil end
@@ -116,8 +116,8 @@ local function teleportCharacterTo(character, checkpointId)
     local hrp = character:FindFirstChild("HumanoidRootPart")
     if not hrp then return false end
     
-    local range  = VandraConfig.SPAWN_RANDOM_RANGE or 4
-    local yOff   = VandraConfig.SPAWN_OFFSET_Y     or 5
+    local range  = JekyConfig.SPAWN_RANDOM_RANGE or 4
+    local yOff   = JekyConfig.SPAWN_OFFSET_Y     or 5
     local spawnPos = target.Position + Vector3.new(
     math.random(-range, range), yOff, math.random(-range, range))
     
@@ -162,7 +162,7 @@ AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
             if sVal then
                 sVal.Value = sVal.Value + amount
                 task.spawn(function()
-                    VandraDataStore:ForceUpdateSummit(tp.UserId, sVal.Value)
+                    JekyDataStore:ForceUpdateSummit(tp.UserId, sVal.Value)
                 end)
                 reply(true, "Added " .. amount .. " Summit to " .. tp.Name)
             else
@@ -172,10 +172,10 @@ AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
             task.spawn(function()
                 local ok, uid = pcall(function() return Players:GetUserIdFromNameAsync(targetName) end)
                     if ok and uid then
-                        local lok, profile = pcall(function() return VandraDataStore:LoadProfile(uid, true) end)
+                        local lok, profile = pcall(function() return JekyDataStore:LoadProfile(uid, true) end)
                             if lok and profile then
                                 local newTotal = (profile.SummitData and profile.SummitData.TotalSummit or 0) + amount
-                                pcall(function() VandraDataStore:ForceUpdateSummit(uid, newTotal) end)
+                                pcall(function() JekyDataStore:ForceUpdateSummit(uid, newTotal) end)
                                     reply(true, "Added " .. amount .. " to offline player " .. targetName)
                                 else
                                     reply(false, "Could not load profile for " .. targetName)
@@ -203,7 +203,7 @@ AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
                         if sVal then
                             sVal.Value = 0
                             task.spawn(function()
-                                VandraDataStore:ForceUpdateSummit(tp.UserId, 0)
+                                JekyDataStore:ForceUpdateSummit(tp.UserId, 0)
                             end)
                             reply(true, "Reset Summit for " .. tp.Name)
                         else
@@ -213,7 +213,7 @@ AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
                         task.spawn(function()
                             local ok, uid = pcall(function() return Players:GetUserIdFromNameAsync(targetName) end)
                                 if ok and uid then
-                                    pcall(function() VandraDataStore:ForceUpdateSummit(uid, 0) end)
+                                    pcall(function() JekyDataStore:ForceUpdateSummit(uid, 0) end)
                                         reply(true, "Reset offline player " .. targetName)
                                     else
                                         reply(false, "Player not found: " .. targetName)
@@ -275,7 +275,7 @@ AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
                             local targetName = tostring(args[1] or "")
                             if targetName == "" then reply(false, "No target specified."); return end
                             
-                            local success = VandraVerified:AddDynamicVerified(targetName, sender.Name, "Added via Admin Panel")
+                            local success = JekyVerified:AddDynamicVerified(targetName, sender.Name, "Added via Admin Panel")
                             if success then
                                 local tp = findPlayer(targetName)
                                 if tp then tp:SetAttribute("IsVerified", true) end
@@ -294,7 +294,7 @@ AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
                             local targetName = tostring(args[1] or "")
                             if targetName == "" then reply(false, "No target specified."); return end
                             
-                            local success = VandraVerified:RemoveDynamicVerified(targetName)
+                            local success = JekyVerified:RemoveDynamicVerified(targetName)
                             if success then
                                 local tp = findPlayer(targetName)
                                 if tp then tp:SetAttribute("IsVerified", false) end
@@ -314,7 +314,7 @@ AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
                             local roleName   = tostring(args[2] or "")
                             if targetName == "" or roleName == "" then reply(false, "Target and role required."); return end
                             
-                            local ok, msg = VandraTitle:AddDynamicRole(targetName, roleName)
+                            local ok, msg = JekyTitle:AddDynamicRole(targetName, roleName)
                             reply(ok, msg)
                             return
                         end
@@ -327,7 +327,7 @@ AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
                             local targetName = tostring(args[1] or "")
                             if targetName == "" then reply(false, "No target specified."); return end
                             
-                            local ok, msg = VandraTitle:RemoveDynamicRole(targetName)
+                            local ok, msg = JekyTitle:RemoveDynamicRole(targetName)
                             reply(ok, msg)
                             return
                         end
@@ -340,11 +340,11 @@ AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
                             local targetName = tostring(args[1] or "")
                             if targetName == "" then reply(false, "No target specified."); return end
                             
-                            local VandraSpeedRunData = require(JekyModules:WaitForChild("VandraSpeedRunData"))
+                            local JekySpeedRunData = require(JekyModules:WaitForChild("JekySpeedRunData"))
                             
                             local tp = findPlayer(targetName)
                             if tp then
-                                VandraSpeedRunData:ResetBestTime(tp.UserId)
+                                JekySpeedRunData:ResetBestTime(tp.UserId)
                                 local ls = tp:FindFirstChild("leaderstats")
                                 if ls then
                                     local btv = ls:FindFirstChild("BestTime")
@@ -361,7 +361,7 @@ AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
                                 task.spawn(function()
                                     local ok, uid = pcall(function() return Players:GetUserIdFromNameAsync(targetName) end)
                                         if ok and uid then
-                                            VandraSpeedRunData:ResetBestTime(uid)
+                                            JekySpeedRunData:ResetBestTime(uid)
                                             reply(true, "SpeedRun reset (offline) for " .. targetName)
                                         else
                                             reply(false, "Player not found: " .. targetName)
@@ -378,9 +378,9 @@ AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
                                 if not hasAccess(sender, "_Value") then reply(false, "No access: _Value"); return end
                                 local v = tonumber(args[1])
                                 if not v or v < 0 then reply(false, "Invalid value."); return end
-                                VandraConfig:SetSummitValue(v)
+                                JekyConfig:SetSummitValue(v)
                                 task.wait(0.5)
-                                VandraConfig:LoadValues()
+                                JekyConfig:LoadValues()
                                 reply(true, "Summit reward set to " .. v)
                                 return
                             end
@@ -392,9 +392,9 @@ AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
                                 if not hasAccess(sender, "_Value") then reply(false, "No access: _Value"); return end
                                 local v = tonumber(args[1])
                                 if not v or v < 0 then reply(false, "Invalid value."); return end
-                                VandraConfig:SetApexValue(v)
+                                JekyConfig:SetApexValue(v)
                                 task.wait(0.5)
-                                VandraConfig:LoadValues()
+                                JekyConfig:LoadValues()
                                 reply(true, "Apex reward set to " .. v)
                                 return
                             end
@@ -411,7 +411,7 @@ AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
                                     elseif mode == "false" or mode == false then mode = false
                                     else reply(false, "Invalid skip mode value."); return end
                                     end
-                                        VandraConfig:SetSkipCheckpointMode(mode)
+                                        JekyConfig:SetSkipCheckpointMode(mode)
                                         reply(true, "Skip Checkpoint = " .. tostring(mode))
                                         return
                                     end
@@ -470,8 +470,8 @@ AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
                                         local msg = tostring(args[1] or "")
                                         if msg == "" then reply(false, "Empty message."); return end
                                         
-                                        local role        = VandraTitle.GetRoleTitle(sender)
-                                        local roleDisplay = VandraTitle.GetRoleDisplayText(role) or role or ""
+                                        local role        = JekyTitle.GetRoleTitle(sender)
+                                        local roleDisplay = JekyTitle.GetRoleDisplayText(role) or role or ""
                                         local formatted   = string.format("[%s] %s : %s", roleDisplay, sender.DisplayName, msg)
                                         
                                         pcall(function()
@@ -489,8 +489,8 @@ AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
                                         local msg = tostring(args[1] or "")
                                         if msg == "" then reply(false, "Empty message."); return end
                                         
-                                        local role        = VandraTitle.GetRoleTitle(sender)
-                                        local roleDisplay = VandraTitle.GetRoleDisplayText(role) or role or ""
+                                        local role        = JekyTitle.GetRoleTitle(sender)
+                                        local roleDisplay = JekyTitle.GetRoleDisplayText(role) or role or ""
                                         local formatted   = string.format("[%s] %s : %s", roleDisplay, sender.DisplayName, msg)
                                         
                                         SummitChatEvent:FireAllClients(formatted)

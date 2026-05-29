@@ -10,7 +10,7 @@ local playerGui = player:WaitForChild("PlayerGui")
 -- ============================================
 -- CONFIGURATION
 -- ============================================
-local GAME_NAME        = "MOUNT IVARAH"
+local GAME_NAME        = "MOUNT ARVENIX"
 local NOTIFY_SOUND_ID  = "rbxassetid://126960584587035" -- Ganti dengan Sound ID milikmu
 local NOTIFY_DURATION  = 3   -- detik frame tampil
 local NOTIFY_INTERVAL  = 0.5 -- jeda antar notifikasi dalam antrian

@@ -1,23 +1,23 @@
--- ServerStorage/JekyModules/VandraConfig
+-- ServerStorage/JekyModules/JekyConfig
  
-local VandraGlobalData = require(script.Parent:WaitForChild("VandraGlobalData"))
-local VandraConfig     = {}
+local JekyGlobalData = require(script.Parent:WaitForChild("JekyGlobalData"))
+local JekyConfig     = {}
  
-VandraConfig.SPAWN_OFFSET_Y      = 5
-VandraConfig.SPAWN_RANDOM_RANGE  = 4
-VandraConfig.TOUCH_COOLDOWN      = 1
-VandraConfig.SPAWN_IMMUNITY_TIME = 2
-VandraConfig.SPEEDRUN_MIN_TIME   = 5
-VandraConfig.SKIP_CHECKPOINT     = false
+JekyConfig.SPAWN_OFFSET_Y      = 5
+JekyConfig.SPAWN_RANDOM_RANGE  = 4
+JekyConfig.TOUCH_COOLDOWN      = 1
+JekyConfig.SPAWN_IMMUNITY_TIME = 2
+JekyConfig.SPEEDRUN_MIN_TIME   = 120
+JekyConfig.SKIP_CHECKPOINT     = false
  
-VandraConfig.SUMMIT_REWARDS = {
-	Summit     = 5,
-	ApexSummit = 200
+JekyConfig.SUMMIT_REWARDS = {
+	Summit     = 1,
+	ApexSummit = 2
 }
  
 -- Jauh lebih ringkas! Hanya tulis perintah yang diizinkan (true).
 -- Jika role atau perintah tidak tertulis, sistem otomatis menganggapnya "false" (tidak punya akses).
-VandraConfig.COMMAND_ACCESS = {
+JekyConfig.COMMAND_ACCESS = {
 	Owner = {
 		_Add = true, _R = true, _Value = true, _Gift = true, _DVip = true,
 		_AddVerified = true, _DVerified = true, _AddRole = true, _RemoveRole = true, _RSpeed = true
@@ -35,36 +35,36 @@ VandraConfig.COMMAND_ACCESS = {
  
 game:GetService("Players").RespawnTime = 2
  
-function VandraConfig:LoadValues()
-    self.SUMMIT_REWARDS.Summit     = VandraGlobalData:GetSummitValue()
-    self.SUMMIT_REWARDS.ApexSummit = VandraGlobalData:GetApexValue()
+function JekyConfig:LoadValues()
+    self.SUMMIT_REWARDS.Summit     = JekyGlobalData:GetSummitValue()
+    self.SUMMIT_REWARDS.ApexSummit = JekyGlobalData:GetApexValue()
 end
  
-function VandraConfig:SetSummitValue(value)
+function JekyConfig:SetSummitValue(value)
     if type(value) == "number" and value >= 0 then
         self.SUMMIT_REWARDS.Summit = value
-        return VandraGlobalData:SetSummitValue(value)
+        return JekyGlobalData:SetSummitValue(value)
     end
     return false
 end
  
-function VandraConfig:SetApexValue(value)
+function JekyConfig:SetApexValue(value)
     if type(value) == "number" and value >= 0 then
         self.SUMMIT_REWARDS.ApexSummit = value
-        return VandraGlobalData:SetApexValue(value)
+        return JekyGlobalData:SetApexValue(value)
     end
     return false
 end
  
-function VandraConfig:GetSummitValue()
+function JekyConfig:GetSummitValue()
     return self.SUMMIT_REWARDS.Summit
 end
  
-function VandraConfig:GetApexValue()
+function JekyConfig:GetApexValue()
     return self.SUMMIT_REWARDS.ApexSummit
 end
  
-function VandraConfig:SetSkipCheckpointMode(skipMode)
+function JekyConfig:SetSkipCheckpointMode(skipMode)
     if type(skipMode) == "boolean" then
         self.SKIP_CHECKPOINT = skipMode
         return true
@@ -72,11 +72,11 @@ function VandraConfig:SetSkipCheckpointMode(skipMode)
     return false
 end
  
-function VandraConfig:GetSkipCheckpointMode()
+function JekyConfig:GetSkipCheckpointMode()
     return self.SKIP_CHECKPOINT
 end
  
-function VandraConfig:HasCommandAccess(roleTitle, commandName)
+function JekyConfig:HasCommandAccess(roleTitle, commandName)
     if not roleTitle or roleTitle == "" then return false end
     local roleAccess = self.COMMAND_ACCESS[roleTitle]
 	
@@ -88,4 +88,4 @@ function VandraConfig:HasCommandAccess(roleTitle, commandName)
     return false
 end
  
-return VandraConfig
+return JekyConfig

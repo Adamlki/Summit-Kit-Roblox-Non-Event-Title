@@ -1,25 +1,25 @@
--- ServerStorage/JekyModules/VandraBoardConfiguration
-local VandraBoardConfiguration = {}
+-- ServerStorage/JekyModules/JekyBoardConfiguration
+local JekyBoardConfiguration = {}
 
 -- FILTER UNTUK SUMMIT LEADERBOARD (Server & Global)
-VandraBoardConfiguration.SummitRoleFilter = {
+JekyBoardConfiguration.SummitRoleFilter = {
 	Owner = true, Developer = true, HeadAdmin = true,
 	Admin = true, Moderator = true, Streamer = true, Community = true,
 }
 
 -- FILTER UNTUK SPEEDRUN LEADERBOARD
-VandraBoardConfiguration.SpeedRunRoleFilter = {
+JekyBoardConfiguration.SpeedRunRoleFilter = {
 	Owner = true, Developer = true, HeadAdmin = true,
 	Admin = true, Moderator = true, Streamer = true, Community = true,
 }
 
 -- FILTER UNTUK ADMIN BOARD (ROLE SHOWCASE)
-VandraBoardConfiguration.AdminBoardRoleFilter = {
+JekyBoardConfiguration.AdminBoardRoleFilter = {
 	Owner = true, Developer = true, HeadAdmin = true,
 	Admin = true, Moderator = true, Streamer = false, Community = false,
 }
 
-function VandraBoardConfiguration:CanShowOnSummitLeaderboard(roleTitle)
+function JekyBoardConfiguration:CanShowOnSummitLeaderboard(roleTitle)
 	if not roleTitle or roleTitle == "" then return true end
 	if self.SummitRoleFilter[roleTitle] ~= nil then
 		return self.SummitRoleFilter[roleTitle]
@@ -27,7 +27,7 @@ function VandraBoardConfiguration:CanShowOnSummitLeaderboard(roleTitle)
 	return true
 end
 
-function VandraBoardConfiguration:CanShowOnSpeedRunLeaderboard(roleTitle)
+function JekyBoardConfiguration:CanShowOnSpeedRunLeaderboard(roleTitle)
 	if not roleTitle or roleTitle == "" then return true end
 	if self.SpeedRunRoleFilter[roleTitle] ~= nil then
 		return self.SpeedRunRoleFilter[roleTitle]
@@ -35,7 +35,7 @@ function VandraBoardConfiguration:CanShowOnSpeedRunLeaderboard(roleTitle)
 	return true
 end
 
-function VandraBoardConfiguration:CanShowOnAdminBoard(roleTitle)
+function JekyBoardConfiguration:CanShowOnAdminBoard(roleTitle)
 	if not roleTitle or roleTitle == "" then return true end
 	if self.AdminBoardRoleFilter[roleTitle] ~= nil then
 		return self.AdminBoardRoleFilter[roleTitle]
@@ -44,7 +44,7 @@ function VandraBoardConfiguration:CanShowOnAdminBoard(roleTitle)
 end
 
 -- PERBAIKAN: Fungsi sekarang spesifik mau mengubah board yang mana
-function VandraBoardConfiguration:SetRoleVisibility(boardType, roleTitle, visible)
+function JekyBoardConfiguration:SetRoleVisibility(boardType, roleTitle, visible)
 	if type(visible) ~= "boolean" then return false end
 	
 	if boardType == "Summit" then
@@ -60,7 +60,7 @@ function VandraBoardConfiguration:SetRoleVisibility(boardType, roleTitle, visibl
 end
 
 -- PERBAIKAN: Mengembalikan semua settingan
-function VandraBoardConfiguration:GetAllRoleSettings()
+function JekyBoardConfiguration:GetAllRoleSettings()
 	return {
 		Summit = self.SummitRoleFilter,
 		SpeedRun = self.SpeedRunRoleFilter,
@@ -68,4 +68,4 @@ function VandraBoardConfiguration:GetAllRoleSettings()
 	}
 end
 
-return VandraBoardConfiguration
+return JekyBoardConfiguration

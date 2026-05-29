@@ -4,18 +4,18 @@ local ServerStorage     = game:GetService("ServerStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService        = game:GetService("RunService")
 
-local VandraSpeedRunData       = require(ServerStorage.JekyModules:WaitForChild("VandraSpeedRunData"))
-local VandraConfig             = require(ServerStorage.JekyModules:WaitForChild("VandraConfig"))
-local VandraTitle              = require(ServerStorage.JekyModules:WaitForChild("VandraTitle"))
-local VandraBoardConfiguration = require(ServerStorage.JekyModules:WaitForChild("VandraBoardConfiguration"))
+local JekySpeedRunData       = require(ServerStorage.JekyModules:WaitForChild("JekySpeedRunData"))
+local JekyConfig             = require(ServerStorage.JekyModules:WaitForChild("JekyConfig"))
+local JekyTitle              = require(ServerStorage.JekyModules:WaitForChild("JekyTitle"))
+local JekyBoardConfiguration = require(ServerStorage.JekyModules:WaitForChild("JekyBoardConfiguration"))
 local PS = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("JekyProfile"):WaitForChild("ProfileServiceJeky"))
 
 local CONFIG = {
 GLOBAL_UPDATE_INTERVAL  = 60,
 SERVER_UPDATE_INTERVAL  = 30,
 MAX_DISPLAY_ENTRIES     = 10,
-LEADERBOARD_FOLDER_PATH = "AllPartSummitkitVandra/LeaderBoard",
-SPEEDRUN_FOLDER_PATH    = "AllPartSummitkitVandra/SpeedRun",
+LEADERBOARD_FOLDER_PATH = "AllPartSummitkitJeky/LeaderBoard",
+SPEEDRUN_FOLDER_PATH    = "AllPartSummitkitJeky/SpeedRun",
 WAIT_FOR_EVENTS_TIMEOUT = 30,
 INITIAL_FETCH_DELAY     = 3,
 RESET_FLUSH_DELAY       = 2,
@@ -76,7 +76,7 @@ local function getOrCreateRE(n)
                                 if RoleCache[userId]==nil then
                                     local p=Players:GetPlayerByUserId(userId)
                                     if p then
-                                        RoleCache[userId]=VandraBoardConfiguration:CanShowOnSpeedRunLeaderboard(VandraTitle.GetRoleTitle(p))
+                                        RoleCache[userId]=JekyBoardConfiguration:CanShowOnSpeedRunLeaderboard(JekyTitle.GetRoleTitle(p))
                                     else
                                         RoleCache[userId]=true
                                     end
@@ -100,7 +100,7 @@ local function getOrCreateRE(n)
                             -- UPDATE LB DATA
                             -- ============================================================
                             local function updateGlobalLeaderboard()
-                                local ok,data=pcall(function() return VandraSpeedRunData:GetGlobalLeaderboard(100) end)
+                                local ok,data=pcall(function() return JekySpeedRunData:GetGlobalLeaderboard(100) end)
                                     if not ok or not data then return end
                                     table.sort(data,function(a,b)
                                         local ta=tonumber(a.BestTime) or math.huge
@@ -299,14 +299,14 @@ local function getOrCreateRE(n)
                                                     SR_Cheat:FireClient(player); PlayerSpeedRunState[uid].IsRunning=false; return
                                                 end
                                                 local elapsed=os.clock()-PlayerSpeedRunState[uid].StartTime
-                                                if elapsed<(VandraConfig.SPEEDRUN_MIN_TIME or 5) then
+                                                if elapsed<(JekyConfig.SPEEDRUN_MIN_TIME or 5) then
                                                     SR_Cheat:FireClient(player); PlayerSpeedRunState[uid].IsRunning=false; return
                                                 end
                                                 PlayerSpeedRunState[uid].IsRunning=false; PlayerSpeedRunState[uid].HasTouchedStart=false
                                                 local old=PlayerSpeedRunState[uid].BestTime or 0
                                                 local isNew=(old==0) or (elapsed<old)
                                                 if isNew then
-                                                    local saved=VandraSpeedRunData:SaveBestTime(uid,player.Name,elapsed,false)
+                                                    local saved=JekySpeedRunData:SaveBestTime(uid,player.Name,elapsed,false)
                                                     if saved then
                                                         PlayerSpeedRunState[uid].BestTime=elapsed
                                                         local ls=player:FindFirstChild("leaderstats")
@@ -330,23 +330,23 @@ local function getOrCreateRE(n)
                                                             local btv=ls:FindFirstChild("BestTime"); if btv then btv:Destroy() end
                                                             btv=Instance.new("StringValue"); btv.Name="BestTime"; btv.Value="N/A"; btv.Parent=ls
                                                             task.spawn(function()
-                                                                local d=VandraSpeedRunData:LoadBestTime(uid); local t=d.BestTime or 0
+                                                                local d=JekySpeedRunData:LoadBestTime(uid); local t=d.BestTime or 0
                                                                 PlayerSpeedRunState[uid]={Username=player.Name,BestTime=t,IsRunning=false,StartTime=0,HasTouchedStart=false}
                                                                 btv.Value=t>0 and formatTime(t) or "N/A"
                                                                 SR_UpdateMemory:FireClient(player,t>0 and t or 0)
                                                             end)
                                                             player.Chatted:Connect(function(msg)
-                                                                local roleTitle=VandraTitle.GetRoleTitle(player); if not roleTitle then return end
+                                                                local roleTitle=JekyTitle.GetRoleTitle(player); if not roleTitle then return end
                                                                 local parts=string.split(msg," "); local cmd=parts[1]
                                                                 if cmd=="_RSpeed" and #parts>=2 then
-                                                                    if not VandraConfig:HasCommandAccess(roleTitle,"_RSpeed") then return end
+                                                                    if not JekyConfig:HasCommandAccess(roleTitle,"_RSpeed") then return end
                                                                     local tname=tostring(parts[2]); local tp=nil
                                                                     for _,p in ipairs(Players:GetPlayers()) do
                                                                         if string.lower(p.Name)==string.lower(tname) or string.lower(p.DisplayName)==string.lower(tname) then tp=p; break end
                                                                     end
                                                                     if tp then
                                                                         local tuid=tp.UserId
-                                                                        VandraSpeedRunData:ResetBestTime(tuid)
+                                                                        JekySpeedRunData:ResetBestTime(tuid)
                                                                         if PlayerSpeedRunState[tuid] then PlayerSpeedRunState[tuid].BestTime=0 end
                                                                         local tls=tp:FindFirstChild("leaderstats")
                                                                         if tls then local tbtv=tls:FindFirstChild("BestTime"); if tbtv and tbtv:IsA("StringValue") then tbtv.Value="N/A" end end
@@ -358,7 +358,7 @@ local function getOrCreateRE(n)
                                                                         local ok,uid2=pcall(function() return Players:GetUserIdFromNameAsync(tname) end)
                                                                             if ok and uid2 then
                                                                                 task.spawn(function()
-                                                                                    VandraSpeedRunData:ResetBestTime(uid2); task.wait(CONFIG.RESET_FLUSH_DELAY); updateGlobalLeaderboard()
+                                                                                    JekySpeedRunData:ResetBestTime(uid2); task.wait(CONFIG.RESET_FLUSH_DELAY); updateGlobalLeaderboard()
                                                                                 end)
                                                                             end
                                                                         end

@@ -6,15 +6,15 @@ local ServerStorage     = game:GetService("ServerStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService        = game:GetService("RunService")
 
-local VandraTitle              = require(ServerStorage.JekyModules:WaitForChild("VandraTitle"))
-local VandraBoardConfiguration = require(ServerStorage.JekyModules:WaitForChild("VandraBoardConfiguration"))
+local JekyTitle              = require(ServerStorage.JekyModules:WaitForChild("JekyTitle"))
+local JekyBoardConfiguration = require(ServerStorage.JekyModules:WaitForChild("JekyBoardConfiguration"))
 local PS = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("JekyProfile"):WaitForChild("ProfileServiceJeky"))
 
 local CONFIG = {
 MAX_ENTRIES          = 10,
 GLOBAL_INTERVAL      = 60,
 SERVER_INTERVAL      = 30,
-LB_PATH              = "AllPartSummitkitVandra/LeaderBoard",
+LB_PATH              = "AllPartSummitkitJeky/LeaderBoard",
 TIMEOUT              = 30,
 INIT_DELAY           = 5,
 AUTO_SYNC_INTERVAL   = 300,
@@ -41,7 +41,7 @@ Players.PlayerRemoving:Connect(function(p) RoleCache[p.UserId] = nil end)
         if RoleCache[userId] == nil then
             local p = Players:GetPlayerByUserId(userId)
             if p then
-                RoleCache[userId] = VandraBoardConfiguration:CanShowOnSummitLeaderboard(VandraTitle.GetRoleTitle(p))
+                RoleCache[userId] = JekyBoardConfiguration:CanShowOnSummitLeaderboard(JekyTitle.GetRoleTitle(p))
             else
                 RoleCache[userId] = true
             end

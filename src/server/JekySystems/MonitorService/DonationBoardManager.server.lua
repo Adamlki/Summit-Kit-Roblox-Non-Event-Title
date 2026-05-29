@@ -9,7 +9,7 @@ local DonationDataStore = DataStoreService:GetOrderedDataStore("GlobalDonationLB
 -- ============================================
 -- KONFIGURASI & DEBUGGER
 -- ============================================
-local REFRESH_TIME = 60
+local REFRESH_TIME = 120
 local MAX_ITEMS = 10
 local EMOTE_ID = "rbxassetid://140349022227594"
 
@@ -30,7 +30,7 @@ debugLog("INIT", "Memulai inisialisasi script DonationBoardManager...")
 -- ============================================
 -- REFERENSI OBJEK
 -- ============================================
-local allPartsFolder = workspace:WaitForChild("AllPartSummitkitVandra")
+local allPartsFolder = workspace:WaitForChild("AllPartSummitkitJeky")
 local leaderboardFolder = allPartsFolder:WaitForChild("LeaderBoard")
 local boardModel = leaderboardFolder:WaitForChild("DonationLeaderBoard")
 

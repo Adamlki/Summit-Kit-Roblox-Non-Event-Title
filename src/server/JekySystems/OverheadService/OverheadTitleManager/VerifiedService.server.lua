@@ -2,9 +2,9 @@ local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage     = game:GetService("ServerStorage")
 
-local VandraVerified = require(ServerStorage.JekyModules.VandraVerified)
-local VandraTitle    = require(ServerStorage.JekyModules.VandraTitle)
-local VandraConfig   = require(ServerStorage.JekyModules.VandraConfig)
+local JekyVerified = require(ServerStorage.JekyModules.JekyVerified)
+local JekyTitle    = require(ServerStorage.JekyModules.JekyTitle)
+local JekyConfig   = require(ServerStorage.JekyModules.JekyConfig)
 
 local VandraEvents = ReplicatedStorage:FindFirstChild("VandraEvents")
 if not VandraEvents then
@@ -27,8 +27,8 @@ local VS_UpdateVerifiedUI = getOrCreateRE("VS_UpdateVerifiedUI")
 
 local function checkAndUpdatePlayer(player)
     if not player or not player.Parent then return false end
-    local roleTitle  = VandraTitle.GetRoleTitle(player)
-    local isVerified = VandraVerified:CheckPlayer(player, roleTitle)
+    local roleTitle  = JekyTitle.GetRoleTitle(player)
+    local isVerified = JekyVerified:CheckPlayer(player, roleTitle)
     player:SetAttribute("IsVerified", isVerified)
     VS_UpdateVerifiedUI:FireClient(player, isVerified)
     return isVerified
@@ -36,10 +36,10 @@ end
 
 local function processVerifiedCommand(player, command, args)
     if not player or not player.Parent then return false, "Invalid player" end
-    local roleTitle = VandraTitle.GetRoleTitle(player)
+    local roleTitle = JekyTitle.GetRoleTitle(player)
     
     if command == "_AddVerified" then
-        if not VandraConfig:HasCommandAccess(roleTitle, "_AddVerified") then
+        if not JekyConfig:HasCommandAccess(roleTitle, "_AddVerified") then
             return false, "No access"
         end
         if not args[1] or args[1] == "" then
@@ -47,7 +47,7 @@ local function processVerifiedCommand(player, command, args)
         end
         local targetUsername = tostring(args[1])
         -- FIX: PS.Verified.Add returns boolean only; build message here
-        local success = VandraVerified:AddDynamicVerified(targetUsername, tostring(player.Name), "Added via command")
+        local success = JekyVerified:AddDynamicVerified(targetUsername, tostring(player.Name), "Added via command")
         local msg = success and ("Added: " .. targetUsername) or ("Already exists: " .. targetUsername)
         if success then
             for _, p in ipairs(Players:GetPlayers()) do
@@ -60,14 +60,14 @@ local function processVerifiedCommand(player, command, args)
         return success, msg
         
     elseif command == "_DVerified" then
-        if not VandraConfig:HasCommandAccess(roleTitle, "_DVerified") then
+        if not JekyConfig:HasCommandAccess(roleTitle, "_DVerified") then
             return false, "No access"
         end
         if not args[1] or args[1] == "" then
             return false, "Usage: _DVerified <username>"
         end
         local targetUsername = tostring(args[1])
-        local success = VandraVerified:RemoveDynamicVerified(targetUsername)
+        local success = JekyVerified:RemoveDynamicVerified(targetUsername)
         local msg = success and ("Removed: " .. targetUsername) or ("Not found: " .. targetUsername)
         if success then
             for _, p in ipairs(Players:GetPlayers()) do
@@ -107,7 +107,7 @@ local function onPlayerChatted(player, message)
 end
 
 local function initialize()
-    VandraVerified:Initialize()
+    JekyVerified:Initialize()
     
     for _, player in ipairs(Players:GetPlayers()) do
         task.spawn(function()

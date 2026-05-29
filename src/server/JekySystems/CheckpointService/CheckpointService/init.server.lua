@@ -5,21 +5,21 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 Players.CharacterAutoLoads = false
 Players.RespawnTime        = 2
  
-local VandraDataStore  = require(ServerStorage.JekyModules:WaitForChild("VandraDataStore"))
-local VandraConfig     = require(ServerStorage.JekyModules:WaitForChild("VandraConfig"))
-local VandraTitle      = require(ServerStorage.JekyModules:WaitForChild("VandraTitle"))
-local VandraGlobalData = require(ServerStorage.JekyModules:WaitForChild("VandraGlobalData"))
+local JekyDataStore  = require(ServerStorage.JekyModules:WaitForChild("JekyDataStore"))
+local JekyConfig     = require(ServerStorage.JekyModules:WaitForChild("JekyConfig"))
+local JekyTitle      = require(ServerStorage.JekyModules:WaitForChild("JekyTitle"))
+local JekyGlobalData = require(ServerStorage.JekyModules:WaitForChild("JekyGlobalData"))
  
-local CHECKPOINT_TOUCH_COOLDOWN = VandraConfig.TOUCH_COOLDOWN or 0.3
+local CHECKPOINT_TOUCH_COOLDOWN = JekyConfig.TOUCH_COOLDOWN or 0.3
 local TELEPORT_TOUCH_COOLDOWN   = 0.5
-local SPAWN_IMMUNITY_TIME       = VandraConfig.SPAWN_IMMUNITY_TIME or 3
+local SPAWN_IMMUNITY_TIME       = JekyConfig.SPAWN_IMMUNITY_TIME or 3
  
 task.spawn(function()
-    VandraDataStore:Initialize()
+    JekyDataStore:Initialize()
     task.wait(1)
-    VandraGlobalData:Initialize()
+    JekyGlobalData:Initialize()
     task.wait(0.5)
-    VandraConfig:LoadValues()
+    JekyConfig:LoadValues()
 end)
  
 local VandraEvents = ReplicatedStorage:FindFirstChild("VandraEvents")
@@ -85,56 +85,56 @@ local ServerLeaderboard = {}
 local GlobalLeaderboard = {}
  
 GetPlayerRole.OnServerInvoke = function(player)
-    return VandraTitle.GetRoleTitle(player)
+    return JekyTitle.GetRoleTitle(player)
 end
  
 API_GetCurrentValues.OnServerInvoke = function(player)
-    local role = VandraTitle.GetRoleTitle(player)
-    if not VandraConfig:HasCommandAccess(role, "_Value") then
+    local role = JekyTitle.GetRoleTitle(player)
+    if not JekyConfig:HasCommandAccess(role, "_Value") then
         return { success = false, message = "No permission" }
     end
     return {
     success        = true,
-    Summit         = VandraConfig:GetSummitValue(),
-    ApexSummit     = VandraConfig:GetApexValue(),
-    SkipCheckpoint = VandraConfig:GetSkipCheckpointMode(),
+    Summit         = JekyConfig:GetSummitValue(),
+    ApexSummit     = JekyConfig:GetApexValue(),
+    SkipCheckpoint = JekyConfig:GetSkipCheckpointMode(),
     }
 end
  
 API_SetSummitValue.OnServerInvoke = function(player, newValue)
-    local role = VandraTitle.GetRoleTitle(player)
-    if not VandraConfig:HasCommandAccess(role, "_Value") then return { success = false, message = "No permission" } end
+    local role = JekyTitle.GetRoleTitle(player)
+    if not JekyConfig:HasCommandAccess(role, "_Value") then return { success = false, message = "No permission" } end
     if type(newValue) ~= "number" or newValue < 0 then return { success = false, message = "Invalid value" } end
-    if VandraConfig:SetSummitValue(newValue) then
-        task.wait(0.5); VandraConfig:LoadValues()
+    if JekyConfig:SetSummitValue(newValue) then
+        task.wait(0.5); JekyConfig:LoadValues()
         return { success = true, message = "Summit updated to " .. newValue }
     end
     return { success = false, message = "Failed" }
 end
  
 API_SetApexValue.OnServerInvoke = function(player, newValue)
-    local role = VandraTitle.GetRoleTitle(player)
-    if not VandraConfig:HasCommandAccess(role, "_Value") then return { success = false, message = "No permission" } end
+    local role = JekyTitle.GetRoleTitle(player)
+    if not JekyConfig:HasCommandAccess(role, "_Value") then return { success = false, message = "No permission" } end
     if type(newValue) ~= "number" or newValue < 0 then return { success = false, message = "Invalid value" } end
-    if VandraConfig:SetApexValue(newValue) then
-        task.wait(0.5); VandraConfig:LoadValues()
+    if JekyConfig:SetApexValue(newValue) then
+        task.wait(0.5); JekyConfig:LoadValues()
         return { success = true, message = "Apex updated to " .. newValue }
     end
     return { success = false, message = "Failed" }
 end
  
 API_SetSkipMode.OnServerInvoke = function(player, skipMode)
-    local role = VandraTitle.GetRoleTitle(player)
-    if not VandraConfig:HasCommandAccess(role, "_Value") then return { success = false, message = "No permission" } end
+    local role = JekyTitle.GetRoleTitle(player)
+    if not JekyConfig:HasCommandAccess(role, "_Value") then return { success = false, message = "No permission" } end
     if type(skipMode) ~= "boolean" then return { success = false, message = "Must be boolean" } end
-    if VandraConfig:SetSkipCheckpointMode(skipMode) then
+    if JekyConfig:SetSkipCheckpointMode(skipMode) then
         return { success = true, message = "Skip mode = " .. tostring(skipMode) }
     end
     return { success = false, message = "Failed" }
 end
  
 local function getCheckpointFolder()
-    local vandra = workspace:FindFirstChild("AllPartSummitkitVandra")
+    local vandra = workspace:FindFirstChild("AllPartSummitkitJeky")
     if not vandra then return nil end
     return vandra:FindFirstChild("Checkpoint")
 end
@@ -201,7 +201,7 @@ local function updateServerLeaderboard()
 end
  
 local function updateGlobalLeaderboard()
-    local ok, data = VandraDataStore:GetGlobalLeaderboard(100)
+    local ok, data = JekyDataStore:GetGlobalLeaderboard(100)
     if ok and data then
         GlobalLeaderboard = data
         CP_Internal_GlobalLBUpdate:Fire(data)
@@ -280,8 +280,8 @@ local function safeLoadCharacter(player)
             task.wait(0.1)
         end
         
-        local range   = VandraConfig.SPAWN_RANDOM_RANGE or 5
-        local offsetY = VandraConfig.SPAWN_OFFSET_Y    or 5
+        local range   = JekyConfig.SPAWN_RANDOM_RANGE or 5
+        local offsetY = JekyConfig.SPAWN_OFFSET_Y    or 5
         local spawnPos = target.Position + Vector3.new(
         math.random(-range, range),
         offsetY,
@@ -322,17 +322,17 @@ local function safeLoadCharacter(player)
         CP_CheckpointUpdated:FireClient(player, newCheckpoint, oldCheckpoint)
         
         task.spawn(function()
-            local profile = VandraDataStore:GetProfile(uid)
+            local profile = JekyDataStore:GetProfile(uid)
             if profile then
-                VandraDataStore:UpdateCheckpoint(uid, newCheckpoint)
+                JekyDataStore:UpdateCheckpoint(uid, newCheckpoint)
                 pcall(function()
-                    if VandraDataStore.UpdateVisitedCheckpoints then
-                        VandraDataStore:UpdateVisitedCheckpoints(uid, PlayerVisited[uid])
+                    if JekyDataStore.UpdateVisitedCheckpoints then
+                        JekyDataStore:UpdateVisitedCheckpoints(uid, PlayerVisited[uid])
                     else
                         profile.CheckpointData.VisitedCheckpoints = PlayerVisited[uid]
                     end
                 end)
-                VandraDataStore:SaveProfile(uid, false)
+                JekyDataStore:SaveProfile(uid, false)
             end
         end)
         
@@ -400,7 +400,7 @@ local function safeLoadCharacter(player)
         if PlayerSummitLock[uid] then return end
         PlayerSummitLock[uid] = true
         
-        local base  = VandraConfig.SUMMIT_REWARDS[summitType] or 0
+        local base  = JekyConfig.SUMMIT_REWARDS[summitType] or 0
         local total = base
         
         local last = PlayerLastSummitReward[uid]
@@ -420,11 +420,11 @@ local function safeLoadCharacter(player)
         })
         
         task.spawn(function()
-            local profile = VandraDataStore:GetProfile(uid)
+            local profile = JekyDataStore:GetProfile(uid)
             if profile then
-                VandraDataStore:UpdateSummit(uid, total)
-                VandraDataStore:SaveProfile(uid, false)
-                VandraDataStore:UpdateGlobalLeaderboardEntry(uid, player.Name, summitLS.Value)
+                JekyDataStore:UpdateSummit(uid, total)
+                JekyDataStore:SaveProfile(uid, false)
+                JekyDataStore:UpdateGlobalLeaderboardEntry(uid, player.Name, summitLS.Value)
             end
             updateServerLeaderboard()
             updateGlobalLeaderboard()
@@ -476,7 +476,7 @@ local function safeLoadCharacter(player)
             end
             
             local function setupCheckpointSystem()
-                local summitkitFolder = workspace:WaitForChild("AllPartSummitkitVandra", 10)
+                local summitkitFolder = workspace:WaitForChild("AllPartSummitkitJeky", 10)
                 if not summitkitFolder then return end
                 local checkpointFolder = summitkitFolder:WaitForChild("Checkpoint", 10)
                 if not checkpointFolder then return end
@@ -530,7 +530,7 @@ local function safeLoadCharacter(player)
                     if checkpointId == "Summit" or checkpointId == "ApexSummit" then
                         if not PlayerRoundState[uid] then return end
                         if not PlayerVisited[uid].BC then return end
-                        if not VandraConfig:GetSkipCheckpointMode() and not hasCompletedAllCheckpoints(uid) then return end
+                        if not JekyConfig:GetSkipCheckpointMode() and not hasCompletedAllCheckpoints(uid) then return end
                         awardSummit(player, checkpointId)
                         PlayerRoundState[uid] = false
                         PlayerBCNotified[uid] = nil
@@ -545,7 +545,7 @@ local function safeLoadCharacter(player)
                         if not PlayerRoundState[uid] then return end
                         if not PlayerVisited[uid].BC then return end
                         
-                        local skipMode = VandraConfig:GetSkipCheckpointMode()
+                        local skipMode = JekyConfig:GetSkipCheckpointMode()
                         
                         if skipMode then
                             PlayerVisited[uid][checkpointId] = true
@@ -596,7 +596,7 @@ local function safeLoadCharacter(player)
             end
             
             local function setupTeleportSystem()
-                local summitkitFolder = workspace:FindFirstChild("AllPartSummitkitVandra")
+                local summitkitFolder = workspace:FindFirstChild("AllPartSummitkitJeky")
                 if not summitkitFolder then return end
                 local tpFolder = summitkitFolder:FindFirstChild("TeleportPart")
                 if not tpFolder then return end
@@ -647,13 +647,13 @@ local function safeLoadCharacter(player)
                             Players.PlayerAdded:Connect(function(player)
                                 
                                 player.Chatted:Connect(function(message)
-                                    local roleTitle = VandraTitle.GetRoleTitle(player)
+                                    local roleTitle = JekyTitle.GetRoleTitle(player)
                                     if not roleTitle then return end
                                     local parts   = string.split(message, " ")
                                     local command = parts[1]
                                     
                                     if command == "_Add" and #parts >= 3 then
-                                        if not VandraConfig:HasCommandAccess(roleTitle, "_Add") then return end
+                                        if not JekyConfig:HasCommandAccess(roleTitle, "_Add") then return end
                                         local targetName = parts[2]
                                         local amount     = tonumber(parts[3])
                                         if not amount then return end
@@ -667,7 +667,7 @@ local function safeLoadCharacter(player)
                                             local _, sLS = ensureLeaderstats(tp)
                                             sLS.Value = sLS.Value + amount
                                             task.spawn(function()
-                                                VandraDataStore:ForceUpdateSummit(tp.UserId, sLS.Value)
+                                                JekyDataStore:ForceUpdateSummit(tp.UserId, sLS.Value)
                                                 task.wait(0.5); updateServerLeaderboard()
                                                 task.wait(0.5); updateGlobalLeaderboard()
                                             end)
@@ -675,12 +675,12 @@ local function safeLoadCharacter(player)
                                             task.spawn(function()
                                                 local ok, uid = pcall(function() return Players:GetUserIdFromNameAsync(targetName) end)
                                                     if ok and uid then
-                                                        local lok, profile = pcall(function() return VandraDataStore:LoadProfile(uid, true) end)
+                                                        local lok, profile = pcall(function() return JekyDataStore:LoadProfile(uid, true) end)
                                                             if lok and profile then
                                                                 local newTotal = profile.SummitData.TotalSummit + amount
-                                                                pcall(function() VandraDataStore:ForceUpdateSummit(uid, newTotal) end)
-                                                                    task.wait(0.5); pcall(function() VandraDataStore:SaveProfile(uid, true) end)
-                                                                        task.wait(0.5); pcall(function() VandraDataStore:UpdateGlobalLeaderboardEntry(uid, targetName, newTotal) end)
+                                                                pcall(function() JekyDataStore:ForceUpdateSummit(uid, newTotal) end)
+                                                                    task.wait(0.5); pcall(function() JekyDataStore:SaveProfile(uid, true) end)
+                                                                        task.wait(0.5); pcall(function() JekyDataStore:UpdateGlobalLeaderboardEntry(uid, targetName, newTotal) end)
                                                                             task.wait(1); updateGlobalLeaderboard()
                                                                         end
                                                                     end
@@ -688,7 +688,7 @@ local function safeLoadCharacter(player)
                                                             end
                                                             
                                                         elseif command == "_R" and #parts >= 2 then
-                                                            if not VandraConfig:HasCommandAccess(roleTitle, "_R") then return end
+                                                            if not JekyConfig:HasCommandAccess(roleTitle, "_R") then return end
                                                             local targetName = parts[2]
                                                             local tp = nil
                                                             for _, p in ipairs(Players:GetPlayers()) do
@@ -700,7 +700,7 @@ local function safeLoadCharacter(player)
                                                                 local _, sLS = ensureLeaderstats(tp)
                                                                 sLS.Value = 0
                                                                 task.spawn(function()
-                                                                    VandraDataStore:ForceUpdateSummit(tp.UserId, 0)
+                                                                    JekyDataStore:ForceUpdateSummit(tp.UserId, 0)
                                                                     task.wait(0.5); updateServerLeaderboard()
                                                                     task.wait(0.5); updateGlobalLeaderboard()
                                                                 end)
@@ -708,11 +708,11 @@ local function safeLoadCharacter(player)
                                                                 task.spawn(function()
                                                                     local ok, uid = pcall(function() return Players:GetUserIdFromNameAsync(targetName) end)
                                                                         if ok and uid then
-                                                                            local lok, profile = pcall(function() return VandraDataStore:LoadProfile(uid, true) end)
+                                                                            local lok, profile = pcall(function() return JekyDataStore:LoadProfile(uid, true) end)
                                                                                 if lok and profile then
-                                                                                    pcall(function() VandraDataStore:ForceUpdateSummit(uid, 0) end)
-                                                                                        task.wait(0.5); pcall(function() VandraDataStore:SaveProfile(uid, true) end)
-                                                                                            task.wait(0.5); pcall(function() VandraDataStore:UpdateGlobalLeaderboardEntry(uid, targetName, 0) end)
+                                                                                    pcall(function() JekyDataStore:ForceUpdateSummit(uid, 0) end)
+                                                                                        task.wait(0.5); pcall(function() JekyDataStore:SaveProfile(uid, true) end)
+                                                                                            task.wait(0.5); pcall(function() JekyDataStore:UpdateGlobalLeaderboardEntry(uid, targetName, 0) end)
                                                                                                 task.wait(1); updateGlobalLeaderboard()
                                                                                             end
                                                                                         end
@@ -720,22 +720,22 @@ local function safeLoadCharacter(player)
                                                                                 end
                                                                                 
                                                                             elseif command == "_Value" and #parts >= 3 then
-                                                                                if not VandraConfig:HasCommandAccess(roleTitle, "_Value") then return end
+                                                                                if not JekyConfig:HasCommandAccess(roleTitle, "_Value") then return end
                                                                                 local vt = parts[2]; local nv = tonumber(parts[3])
                                                                                 if not nv or nv < 0 then return end
                                                                                 if vt == "Big" then
-                                                                                    VandraConfig:SetApexValue(nv); task.wait(0.5); VandraConfig:LoadValues()
+                                                                                    JekyConfig:SetApexValue(nv); task.wait(0.5); JekyConfig:LoadValues()
                                                                                 elseif vt == "Summit" then
-                                                                                    VandraConfig:SetSummitValue(nv); task.wait(0.5); VandraConfig:LoadValues()
+                                                                                    JekyConfig:SetSummitValue(nv); task.wait(0.5); JekyConfig:LoadValues()
                                                                                 end
                                                                                 
                                                                             elseif command == "_AddRole" and #parts >= 3 then
-                                                                                if not VandraConfig:HasCommandAccess(roleTitle, "_AddRole") then return end
-                                                                                VandraTitle:AddDynamicRole(parts[2], parts[3])
+                                                                                if not JekyConfig:HasCommandAccess(roleTitle, "_AddRole") then return end
+                                                                                JekyTitle:AddDynamicRole(parts[2], parts[3])
                                                                                 
                                                                             elseif command == "_RemoveRole" and #parts >= 2 then
-                                                                                if not VandraConfig:HasCommandAccess(roleTitle, "_RemoveRole") then return end
-                                                                                VandraTitle:RemoveDynamicRole(parts[2])
+                                                                                if not JekyConfig:HasCommandAccess(roleTitle, "_RemoveRole") then return end
+                                                                                JekyTitle:RemoveDynamicRole(parts[2])
                                                                             end
                                                                         end)
                                                                         
@@ -751,7 +751,7 @@ local function safeLoadCharacter(player)
                                                                         
                                                                         local cpLS, summitLS = ensureLeaderstats(player)
                                                                         
-                                                                        local profile = VandraDataStore:LoadProfile(uid, false)
+                                                                        local profile = JekyDataStore:LoadProfile(uid, false)
                                                                         if profile then
                                                                             local savedCP     = profile.CheckpointData.CurrentCheckpoint or "BC"
                                                                             local savedSummit = profile.SummitData.TotalSummit           or 0
@@ -869,8 +869,8 @@ local function safeLoadCharacter(player)
                                                                                             PlayerLoadLock[uid]       = nil
                                                                                             
                                                                                             task.spawn(function()
-                                                                                                local p = VandraDataStore:GetProfile(uid)
-                                                                                                if p then VandraDataStore:IncrementDeaths(uid) end
+                                                                                                local p = JekyDataStore:GetProfile(uid)
+                                                                                                if p then JekyDataStore:IncrementDeaths(uid) end
                                                                                             end)
                                                                                             
                                                                                             local newRespawnCP = PlayerRespawnLocation[uid] or cpLS.Value
@@ -897,9 +897,9 @@ local function safeLoadCharacter(player)
                                                                                 Players.PlayerRemoving:Connect(function(player)
                                                                                     local uid = player.UserId
                                                                                     task.spawn(function()
-                                                                                        local profile = VandraDataStore:GetProfile(uid)
+                                                                                        local profile = JekyDataStore:GetProfile(uid)
                                                                                         if profile then
-                                                                                            VandraDataStore:SaveProfile(uid, true)
+                                                                                            JekyDataStore:SaveProfile(uid, true)
                                                                                         end
                                                                                     end)
                                                                                     PlayerRoundState[uid]       = nil
@@ -917,7 +917,7 @@ local function safeLoadCharacter(player)
                                                                                 end)
                                                                                 
                                                                                 task.spawn(function()
-                                                                                    workspace:WaitForChild("AllPartSummitkitVandra", 30)
+                                                                                    workspace:WaitForChild("AllPartSummitkitJeky", 30)
                                                                                     task.wait(1)
                                                                                     setupCheckpointSystem()
                                                                                     setupTeleportSystem()

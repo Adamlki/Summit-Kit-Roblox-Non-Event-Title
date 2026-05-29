@@ -6,8 +6,8 @@ local ServerStorage     = game:GetService("ServerStorage")
 local TextService       = game:GetService("TextService")
  
 --// LOAD VANDRA TITLE
-local VandraTitle = require(
-ServerStorage:WaitForChild("JekyModules"):WaitForChild("VandraTitle")
+local JekyTitle = require(
+ServerStorage:WaitForChild("JekyModules"):WaitForChild("JekyTitle")
 )
  
 --// AUTO CREATE REMOTE
@@ -56,10 +56,10 @@ local function buildJoinMessage(player)
         return SPECIAL_JOIN[player.Name]
     end
     
-    local role = VandraTitle.GetRoleTitle(player)
+    local role = JekyTitle.GetRoleTitle(player)
     if not role or not isEligibleRole(role) then return nil end
     
-    local displayText = VandraTitle.GetRoleDisplayText(role)
+    local displayText = JekyTitle.GetRoleDisplayText(role)
     return string.format(
     "Server information : %s [%s] has joined the server",
     player.DisplayName,
@@ -94,7 +94,7 @@ Players.PlayerAdded:Connect(function(player)
         -- CHAT COMMAND
         player.Chatted:Connect(function(message)
  
-            local role = VandraTitle.GetRoleTitle(player)
+            local role = JekyTitle.GetRoleTitle(player)
             if not isEligibleRole(role) then return end
             if #message < 4 then return end
  
@@ -108,7 +108,7 @@ Players.PlayerAdded:Connect(function(player)
             local filteredText = filterMessage(player, isiPesan)
             if not filteredText then return end
  
-            local roleDisplay = VandraTitle.GetRoleDisplayText(role)
+            local roleDisplay = JekyTitle.GetRoleDisplayText(role)
  
             local formatted = string.format(
             "[%s] %s %s : %s",

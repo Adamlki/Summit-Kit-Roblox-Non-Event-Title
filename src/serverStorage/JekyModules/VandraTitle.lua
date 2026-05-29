@@ -1,6 +1,6 @@
--- ServerStorage/JekyModules/VandraTitle
+-- ServerStorage/JekyModules/JekyTitle
 
-local VandraTitle = {}
+local JekyTitle = {}
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -11,7 +11,7 @@ ReplicatedStorage:WaitForChild("Shared"):WaitForChild("JekyProfile"):WaitForChil
 -- ============================================================
 -- ROLE CONFIG
 -- ============================================================
-VandraTitle.RoleRules = {
+JekyTitle.RoleRules = {
 Owner     = { UserIds = {}, Usernames = { "adamzz3372" } },
 Developer = { UserIds = {}, Usernames = { "" } },
 HeadAdmin = { UserIds = {}, Usernames = { "",} },
@@ -20,20 +20,20 @@ Moderator = { UserIds = {}, Usernames = { "" } },
 Streamer  = { UserIds = {}, Usernames = { "" } },
 Community = { UserIds = {}, Usernames = { "","" } },
 }
-VandraTitle.RoleOrder = { "Owner","Developer","HeadAdmin","Admin","Moderator","Streamer","Community" }
-VandraTitle.RoleDisplay = {
+JekyTitle.RoleOrder = { "Owner","Developer","HeadAdmin","Admin","Moderator","Streamer","Community" }
+JekyTitle.RoleDisplay = {
 Owner="👑OWNER", Developer="DEVELOPER", HeadAdmin="ADMIN GANTENG",
 Admin="ADMIN CANTIK", Moderator="MODERATOR IMUT", Streamer="STREAMER", Community="FACILE COMUNITY",
 }
-VandraTitle.RoleColors = {
+JekyTitle.RoleColors = {
 Owner=Color3.fromRGB(255,215,0), Developer=Color3.fromRGB(0,255,255),
 HeadAdmin=Color3.fromRGB(148,0,211), Admin=Color3.fromRGB(255,69,0),
 Moderator=Color3.fromRGB(50,205,50), Streamer=Color3.fromRGB(255,0,0),
 Community=Color3.fromRGB(255,182,193),
 }
-VandraTitle.RoleUsesGradient = { Owner=true, Community=true }
+JekyTitle.RoleUsesGradient = { Owner=true, Community=true }
 
-VandraTitle.SummitLevels = {
+JekyTitle.SummitLevels = {
 {Min=-1,Title="OVERLOADED"},{Min=0,Title="NEWBIE EXPLORER"},{Min=1,Title="BRAVE GUARDIAN"},
 {Min=20,Title="SWIFT WANDERER"},{Min=40,Title="NOBLE TRAVELER"},{Min=60,Title="FIERCE WARRIOR"},
 {Min=80,Title="MIGHTY CAPTAIN"},{Min=100,Title="GRAND CONQUEROR"},{Min=120,Title="DEEP DIVER"},
@@ -70,7 +70,7 @@ VandraTitle.SummitLevels = {
 {Min=1940,Title="MEGA DESTROYER"},{Min=1960,Title="GRAND ENTERTAINER"},{Min=1980,Title="LIFE GIVER"},
 {Min=2000,Title="TOTAL ELIMINATOR"},
 }
-VandraTitle.SummitColors = {
+JekyTitle.SummitColors = {
 ["OVERLOADED"]=Color3.fromRGB(138,43,226),["NEWBIE EXPLORER"]=Color3.fromRGB(135,206,250),
 ["BRAVE GUARDIAN"]=Color3.fromRGB(100,150,255),["SWIFT WANDERER"]=Color3.fromRGB(120,220,100),
 ["NOBLE TRAVELER"]=Color3.fromRGB(255,180,80),["FIERCE WARRIOR"]=Color3.fromRGB(220,100,100),
@@ -123,25 +123,25 @@ VandraTitle.SummitColors = {
 ["FIERCE REPELLER"]=Color3.fromRGB(140,180,180),["MEGA DESTROYER"]=Color3.fromRGB(180,140,180),
 ["LIFE GIVER"]=Color3.fromRGB(120,220,120),["TOTAL ELIMINATOR"]=Color3.fromRGB(120,120,220),
 }
-VandraTitle.MinusGradient = { Colors={Color3.fromRGB(138,43,226),Color3.fromRGB(75,0,130),Color3.fromRGB(25,25,112)}, Speed=0.02, RotationSpeed=3 }
-VandraTitle.Gradient1K    = { Colors={Color3.fromRGB(0,100,255),Color3.fromRGB(255,255,0),Color3.fromRGB(255,0,0)}, Speed=0.02, RotationSpeed=3 }
-VandraTitle.Gradient2K    = { Colors={Color3.fromRGB(255,0,255),Color3.fromRGB(0,255,255),Color3.fromRGB(255,255,0)}, Speed=0.02, RotationSpeed=3 }
-VandraTitle.Gradient3K    = { Colors={Color3.fromRGB(255,0,0),Color3.fromRGB(255,127,0),Color3.fromRGB(255,255,0)}, Speed=0.02, RotationSpeed=3 }
-VandraTitle.Gradient5K    = { Colors={Color3.fromRGB(148,0,211),Color3.fromRGB(75,0,130),Color3.fromRGB(0,0,255),Color3.fromRGB(0,255,0),Color3.fromRGB(255,255,0),Color3.fromRGB(255,127,0),Color3.fromRGB(255,0,0)}, Speed=0.02, RotationSpeed=4 }
+JekyTitle.MinusGradient = { Colors={Color3.fromRGB(138,43,226),Color3.fromRGB(75,0,130),Color3.fromRGB(25,25,112)}, Speed=0.02, RotationSpeed=3 }
+JekyTitle.Gradient1K    = { Colors={Color3.fromRGB(0,100,255),Color3.fromRGB(255,255,0),Color3.fromRGB(255,0,0)}, Speed=0.02, RotationSpeed=3 }
+JekyTitle.Gradient2K    = { Colors={Color3.fromRGB(255,0,255),Color3.fromRGB(0,255,255),Color3.fromRGB(255,255,0)}, Speed=0.02, RotationSpeed=3 }
+JekyTitle.Gradient3K    = { Colors={Color3.fromRGB(255,0,0),Color3.fromRGB(255,127,0),Color3.fromRGB(255,255,0)}, Speed=0.02, RotationSpeed=3 }
+JekyTitle.Gradient5K    = { Colors={Color3.fromRGB(148,0,211),Color3.fromRGB(75,0,130),Color3.fromRGB(0,0,255),Color3.fromRGB(0,255,0),Color3.fromRGB(255,255,0),Color3.fromRGB(255,127,0),Color3.fromRGB(255,0,0)}, Speed=0.02, RotationSpeed=4 }
 
 -- ============================================================
 -- DYNAMIC ROLES
 -- ============================================================
-function VandraTitle:LoadDynamicRole(userId)
+function JekyTitle:LoadDynamicRole(userId)
     return PS.Roles.Load(userId)
 end
 
-function VandraTitle:SaveDynamicRole(userId, roleData)
+function JekyTitle:SaveDynamicRole(userId, roleData)
     PS.Roles.Save(userId, roleData)
 end
 
 -- FIX: Support offline player — pakai GetUserIdFromNameAsync jika player tidak online
-function VandraTitle:AddDynamicRole(username, roleName)
+function JekyTitle:AddDynamicRole(username, roleName)
     if not username or not roleName then return false, "Invalid parameters" end
     
     local valid = { Owner=true, Developer=true, HeadAdmin=true, Admin=true, Moderator=true, Streamer=true, Community=true }
@@ -153,7 +153,7 @@ function VandraTitle:AddDynamicRole(username, roleName)
         PS.Roles.Save(target.UserId, { role=roleName, username=username, addedAt=os.time() })
         PS.Roles.ForceFlush(target.UserId)
         target:SetAttribute("DynamicRole",      roleName)
-        target:SetAttribute("RoleUsesGradient", VandraTitle.RoleUsesGradient[roleName] == true)
+        target:SetAttribute("RoleUsesGradient", JekyTitle.RoleUsesGradient[roleName] == true)
         return true, "Role added: " .. username .. " → " .. roleName
     else
         -- FIX: Player offline — cari userId lalu simpan langsung ke DataStore
@@ -170,7 +170,7 @@ function VandraTitle:AddDynamicRole(username, roleName)
 end
 
 -- FIX: Support offline player
-function VandraTitle:RemoveDynamicRole(username)
+function JekyTitle:RemoveDynamicRole(username)
     if not username then return false, "Invalid username" end
     
     local target = Players:FindFirstChild(username)
@@ -210,27 +210,27 @@ local function roleMatch(userId, username, rule)
     return false
 end
 
-function VandraTitle.GetRoleTitle(player)
+function JekyTitle.GetRoleTitle(player)
     local dyn = player:GetAttribute("DynamicRole")
     if dyn and dyn ~= "" then return dyn end
     local cached = PS.Roles.Load(player.UserId)
     if cached and cached.role then return cached.role end
-    for _, name in ipairs(VandraTitle.RoleOrder) do
-        if roleMatch(player.UserId, player.Name, VandraTitle.RoleRules[name]) then
+    for _, name in ipairs(JekyTitle.RoleOrder) do
+        if roleMatch(player.UserId, player.Name, JekyTitle.RoleRules[name]) then
             return name
         end
     end
     return nil
 end
 
-function VandraTitle.GetRoleDisplayText(r)   return r and VandraTitle.RoleDisplay[r] or r or "" end
-function VandraTitle.GetRoleColor(r)         return r and VandraTitle.RoleColors[r] or nil end
-function VandraTitle.GetRoleUsesGradient(r)  return VandraTitle.RoleUsesGradient[r] == true end
+function JekyTitle.GetRoleDisplayText(r)   return r and JekyTitle.RoleDisplay[r] or r or "" end
+function JekyTitle.GetRoleColor(r)         return r and JekyTitle.RoleColors[r] or nil end
+function JekyTitle.GetRoleUsesGradient(r)  return JekyTitle.RoleUsesGradient[r] == true end
 
-function VandraTitle.GetSummitTitle(total)
+function JekyTitle.GetSummitTitle(total)
     total = tonumber(total) or 0
-    local best, bestMin = VandraTitle.SummitLevels[1].Title, -math.huge
-    for _, lvl in ipairs(VandraTitle.SummitLevels) do
+    local best, bestMin = JekyTitle.SummitLevels[1].Title, -math.huge
+    for _, lvl in ipairs(JekyTitle.SummitLevels) do
         if total >= lvl.Min and lvl.Min >= bestMin then
             best, bestMin = lvl.Title, lvl.Min
         end
@@ -238,48 +238,48 @@ function VandraTitle.GetSummitTitle(total)
     return best
 end
 
-function VandraTitle.GetSummitColor(title)
-    return VandraTitle.SummitColors[title] or Color3.fromRGB(200,200,200)
+function JekyTitle.GetSummitColor(title)
+    return JekyTitle.SummitColors[title] or Color3.fromRGB(200,200,200)
 end
 
-function VandraTitle.GetSpecialSummitGradient(total)
+function JekyTitle.GetSpecialSummitGradient(total)
     total = tonumber(total) or 0
-    if total < 0         then return VandraTitle.MinusGradient
-    elseif total >= 5000 then return VandraTitle.Gradient5K
-    elseif total >= 3000 then return VandraTitle.Gradient3K
-    elseif total >= 2000 then return VandraTitle.Gradient2K
-    elseif total >= 1000 then return VandraTitle.Gradient1K
+    if total < 0         then return JekyTitle.MinusGradient
+    elseif total >= 5000 then return JekyTitle.Gradient5K
+    elseif total >= 3000 then return JekyTitle.Gradient3K
+    elseif total >= 2000 then return JekyTitle.Gradient2K
+    elseif total >= 1000 then return JekyTitle.Gradient1K
     end
         return nil
     end
     
-    function VandraTitle.ShouldUseSpecialSummitGradient(total)
-        return VandraTitle.GetSpecialSummitGradient(total) ~= nil
+    function JekyTitle.ShouldUseSpecialSummitGradient(total)
+        return JekyTitle.GetSpecialSummitGradient(total) ~= nil
     end
     
-    function VandraTitle.BuildTitles(player, totalSummit)
+    function JekyTitle.BuildTitles(player, totalSummit)
         totalSummit = tonumber(totalSummit) or 0
-        return VandraTitle.GetRoleTitle(player),
-        VandraTitle.GetSummitTitle(totalSummit),
+        return JekyTitle.GetRoleTitle(player),
+        JekyTitle.GetSummitTitle(totalSummit),
         string.format("SUMMIT: %d", totalSummit)
     end
     
     -- ============================================================
     -- INIT PLAYER
     -- ============================================================
-    function VandraTitle:InitializePlayer(player)
+    function JekyTitle:InitializePlayer(player)
         task.spawn(function()
             task.wait(1)
             local d = PS.Roles.Load(player.UserId)
             if d and d.role then
                 player:SetAttribute("DynamicRole",      d.role)
-                player:SetAttribute("RoleUsesGradient", VandraTitle.RoleUsesGradient[d.role] == true)
+                player:SetAttribute("RoleUsesGradient", JekyTitle.RoleUsesGradient[d.role] == true)
             end
         end)
     end
     
     Players.PlayerAdded:Connect(function(player)
-        VandraTitle:InitializePlayer(player)
+        JekyTitle:InitializePlayer(player)
     end)
     
     Players.PlayerRemoving:Connect(function(player)
@@ -289,7 +289,7 @@ function VandraTitle.GetSpecialSummitGradient(total)
     -- ============================================================
     -- API
     -- ============================================================
-    VandraTitle.API = {
+    JekyTitle.API = {
     GetAllPlayers = function()
         local list = {}
         for _, p in ipairs(Players:GetPlayers()) do
@@ -297,15 +297,15 @@ function VandraTitle.GetSpecialSummitGradient(total)
             Name        = p.Name,
             DisplayName = p.DisplayName,
             UserId      = p.UserId,
-            Role        = VandraTitle.GetRoleTitle(p) or "None"
+            Role        = JekyTitle.GetRoleTitle(p) or "None"
             })
         end
         return list
     end,
-    AddRole           = function(u, r) return VandraTitle:AddDynamicRole(u, r) end,
-        RemoveRole        = function(u)    return VandraTitle:RemoveDynamicRole(u) end,
+    AddRole           = function(u, r) return JekyTitle:AddDynamicRole(u, r) end,
+        RemoveRole        = function(u)    return JekyTitle:RemoveDynamicRole(u) end,
             GetAvailableRoles = function()     return { "Owner","Developer","HeadAdmin","Admin","Moderator","Streamer","Community" } end,
                 }
                 
-                return VandraTitle
+                return JekyTitle
 

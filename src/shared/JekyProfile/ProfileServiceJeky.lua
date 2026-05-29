@@ -594,7 +594,7 @@ local function safeSet(store, key, value)
                                                                         -- ============================================================
                                                                         -- 5. VERIFIED
                                                                         -- ============================================================
-                                                                        local VERIFIED_STORE = "VandraVerifiedDynamic_v1"
+                                                                        local VERIFIED_STORE = "JekyVerifiedDynamic_v1"
                                                                         local verifiedCache  = nil
                                                                         local verifiedSaving = false
                                                                         local verifiedDirty  = false

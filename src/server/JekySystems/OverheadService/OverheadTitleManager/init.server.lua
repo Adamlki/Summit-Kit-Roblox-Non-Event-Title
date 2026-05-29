@@ -3,7 +3,7 @@ local Players          = game:GetService("Players")
 local ServerStorage    = game:GetService("ServerStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
  
-local VandraTitle = require(ServerStorage.JekyModules:WaitForChild("VandraTitle"))
+local JekyTitle = require(ServerStorage.JekyModules:WaitForChild("JekyTitle"))
  
 local VandraEvents = ReplicatedStorage:FindFirstChild("VandraEvents")
 if not VandraEvents then
@@ -63,15 +63,15 @@ local function updatePlayerTitle(player, total)
     if updateThrottle[userId] and (now - updateThrottle[userId]) < 2 then return end
     updateThrottle[userId] = now
     
-    local roleTitle, summitTitle, totalText = VandraTitle.BuildTitles(player, total)
-    local roleColor        = VandraTitle.GetRoleColor(roleTitle)
-    local roleUsesGradient = VandraTitle.GetRoleUsesGradient(roleTitle)
-    local useSpecialSummitGradient = VandraTitle.ShouldUseSpecialSummitGradient(total)
-    local specialGradientConfig    = VandraTitle.GetSpecialSummitGradient(total)
+    local roleTitle, summitTitle, totalText = JekyTitle.BuildTitles(player, total)
+    local roleColor        = JekyTitle.GetRoleColor(roleTitle)
+    local roleUsesGradient = JekyTitle.GetRoleUsesGradient(roleTitle)
+    local useSpecialSummitGradient = JekyTitle.ShouldUseSpecialSummitGradient(total)
+    local specialGradientConfig    = JekyTitle.GetSpecialSummitGradient(total)
     
     pcall(function()
         player:SetAttribute("RoleTitle",                roleTitle or "")
-        player:SetAttribute("RoleDisplayText",          VandraTitle.GetRoleDisplayText(roleTitle))
+        player:SetAttribute("RoleDisplayText",          JekyTitle.GetRoleDisplayText(roleTitle))
         player:SetAttribute("RoleUsesGradient",         roleUsesGradient)
         player:SetAttribute("SummitTitle",              summitTitle or "NEWBIE EXPLORER")
         player:SetAttribute("TotalSummitText",          totalText or "SUMMIT: 0")
@@ -82,7 +82,7 @@ local function updatePlayerTitle(player, total)
         end
     end)
     
-    local summitColor = VandraTitle.GetSummitColor(summitTitle)
+    local summitColor = JekyTitle.GetSummitColor(summitTitle)
     if summitColor then
         pcall(function() player:SetAttribute("SummitColor", summitColor) end)
         end
@@ -90,7 +90,7 @@ local function updatePlayerTitle(player, total)
             pcall(function()
                 OT_TitleUpdate:FireClient(player, {
                 RoleTitle              = roleTitle or "",
-                RoleDisplayText        = VandraTitle.GetRoleDisplayText(roleTitle),
+                RoleDisplayText        = JekyTitle.GetRoleDisplayText(roleTitle),
                 RoleColor              = roleColor,
                 RoleUsesGradient       = roleUsesGradient,
                 SummitTitle            = summitTitle or "NEWBIE EXPLORER",
@@ -126,7 +126,7 @@ local function updatePlayerTitle(player, total)
                             if not args or #args < 2 then return end
                             local username = args[1]
                             local roleName = args[2]
-                            local success  = VandraTitle:AddDynamicRole(username, roleName)
+                            local success  = JekyTitle:AddDynamicRole(username, roleName)
                             if success then
                                 task.wait(0.3)
                                 local targetPlayer = Players:FindFirstChild(username)
@@ -142,7 +142,7 @@ local function updatePlayerTitle(player, total)
                             if not isAdmin(player) then return end
                             if not args or #args < 1 then return end
                             local username = args[1]
-                            local success  = VandraTitle:RemoveDynamicRole(username)
+                            local success  = JekyTitle:RemoveDynamicRole(username)
                             if success then
                                 task.wait(0.3)
                                 local targetPlayer = Players:FindFirstChild(username)
@@ -287,7 +287,7 @@ local function updatePlayerTitle(player, total)
                         
                         RoleAPI_GetAllRoles.OnServerEvent:Connect(function(player)
                             if not player or not isAdmin(player) then return end
-                            local playerList = VandraTitle.API.GetAllPlayers()
+                            local playerList = JekyTitle.API.GetAllPlayers()
                             if playerList then
                                 pcall(function() RoleAPI_GetAllRoles:FireClient(player, playerList) end)
                                 end
@@ -296,7 +296,7 @@ local function updatePlayerTitle(player, total)
                                     RoleAPI_AddRole.OnServerEvent:Connect(function(player, username, roleName)
                                         if not player or not isAdmin(player) then return end
                                         if not username or not roleName then return end
-                                        local success, message = VandraTitle.API.AddRole(username, roleName)
+                                        local success, message = JekyTitle.API.AddRole(username, roleName)
                                         if success then
                                             task.wait(0.3)
                                             local targetPlayer = Players:FindFirstChild(username)
@@ -311,7 +311,7 @@ local function updatePlayerTitle(player, total)
                                             RoleAPI_RemoveRole.OnServerEvent:Connect(function(player, username)
                                                 if not player or not isAdmin(player) then return end
                                                 if not username then return end
-                                                local success = VandraTitle.API.RemoveRole(username)
+                                                local success = JekyTitle.API.RemoveRole(username)
                                                 if success then
                                                     task.wait(0.3)
                                                     local targetPlayer = Players:FindFirstChild(username)

@@ -45,9 +45,9 @@ local hiddenPosition
 -- INITIALIZE MUSIC FOLDER
 -- ============================================
 local function initializeMusicFolder()
-    local root = Workspace:WaitForChild("AllPartSummitkitVandra", 10)
+    local root = Workspace:WaitForChild("AllPartSummitkitJeky", 10)
     if not root then
-        warn("[MusicSystem] AllPartSummitkitVandra not found")
+        warn("[MusicSystem] AllPartSummitkitJeky not found")
         return false
     end
  

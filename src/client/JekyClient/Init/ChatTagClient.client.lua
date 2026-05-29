@@ -19,7 +19,7 @@ local ROLE_TAGS = {
 	Moderator = "MODERATOR",
 	Streamer  = "STREAMER",
 	VIP       = "VIP",
-	Community = "FACILE COMUNITY",
+	Community = "COMMUNITY",
 }
 
 local ROLE_COLORS = {
@@ -192,7 +192,7 @@ task.spawn(function()
 end)
 
 Players.PlayerAdded:Connect(function(joinedPlayer)
-	-- Tunggu VandraTitle:InitializePlayer() selesai (butuh ~1 detik + buffer)
+	-- Tunggu JekyTitle:InitializePlayer() selesai (butuh ~1 detik + buffer)
 	task.delay(2, function()
 		if isReady then
 			pcall(function() fetchRolesFromServer(joinedPlayer.UserId) end)

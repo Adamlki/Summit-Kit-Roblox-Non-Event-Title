@@ -5,7 +5,7 @@ local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local VandraTitle = require(ServerStorage:WaitForChild("JekyModules"):WaitForChild("VandraTitle"))
+local JekyTitle = require(ServerStorage:WaitForChild("JekyModules"):WaitForChild("JekyTitle"))
 
 -- Buat RemoteFunction & RemoteEvent
 local GetPlayerRolesRF = Instance.new("RemoteFunction")
@@ -42,8 +42,8 @@ end
 local function getPlayerRoles(player)
 	local roles = {}
 
-	-- Ambil role dari VandraTitle
-	local rawRoleTitle = VandraTitle.GetRoleTitle(player)
+	-- Ambil role dari JekyTitle
+	local rawRoleTitle = JekyTitle.GetRoleTitle(player)
 	local roleTitle = normalizeRoleName(rawRoleTitle)
 
 	if roleTitle then
@@ -82,12 +82,12 @@ local function getPlayerRoles(player)
 end
 
 -- ✅ FIX UTAMA: Tunggu DynamicRole selesai di-load dari DataStore sebelum return roles
--- VandraTitle:InitializePlayer() pakai task.wait(1), jadi kita tunggu max 5 detik
+-- JekyTitle:InitializePlayer() pakai task.wait(1), jadi kita tunggu max 5 detik
 GetPlayerRolesRF.OnServerInvoke = function(player, targetUserId)
 	local targetPlayer = Players:GetPlayerByUserId(targetUserId)
 	if not targetPlayer then return {} end
 
-	-- Tunggu attribute DynamicRole tersedia (di-load dari DataStore oleh VandraTitle)
+	-- Tunggu attribute DynamicRole tersedia (di-load dari DataStore oleh JekyTitle)
 	local waited = 0
 	local maxWait = 5 -- detik
 	local interval = 0.3
@@ -101,7 +101,7 @@ GetPlayerRolesRF.OnServerInvoke = function(player, targetUserId)
 			break -- Attribute sudah siap
 		end
 		-- Cek juga apakah player ini punya role statis dari RoleRules
-		local staticRole = VandraTitle.GetRoleTitle(targetPlayer)
+		local staticRole = JekyTitle.GetRoleTitle(targetPlayer)
 		if staticRole then
 			break -- Punya role statis, tidak perlu tunggu DataStore
 		end
@@ -125,12 +125,12 @@ Players.PlayerAdded:Connect(function(player)
 		notifyAllClients(player.UserId)
 	end)
 
-	-- Listen perubahan DynamicRole (di-set oleh VandraTitle:InitializePlayer)
+	-- Listen perubahan DynamicRole (di-set oleh JekyTitle:InitializePlayer)
 	player:GetAttributeChangedSignal("DynamicRole"):Connect(function()
 		notifyAllClients(player.UserId)
 	end)
 
-	-- Notify setelah VandraTitle selesai InitializePlayer (butuh ~1 detik + buffer)
+	-- Notify setelah JekyTitle selesai InitializePlayer (butuh ~1 detik + buffer)
 	task.delay(3, function()
 		if player and player.Parent then
 			notifyAllClients(player.UserId)
