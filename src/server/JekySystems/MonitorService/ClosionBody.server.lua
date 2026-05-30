@@ -3,62 +3,51 @@
 local Players = game:GetService("Players")
 local PhysicsService = game:GetService("PhysicsService")
 
--- Buat collision group untuk players
+local COLLISION_GROUP = "Players"
+
+-- Setup Collision Group: Set agar "Players" tidak bisa bertabrakan dengan "Players"
 local function setupCollisionGroups()
-    pcall(function()
-        PhysicsService:RegisterCollisionGroup("Players")
+    local success, err = pcall(function()
+        PhysicsService:RegisterCollisionGroup(COLLISION_GROUP)
     end)
-    PhysicsService:CollisionGroupSetCollidable("Players", "Players", false)
+    PhysicsService:CollisionGroupSetCollidable(COLLISION_GROUP, COLLISION_GROUP, false)
 end
 
--- Fungsi untuk disable collision pada character
-local function disableCollision(character)
-    -- Tunggu character benar-benar loaded
+-- Fungsi untuk meng-assign part ke Collision Group
+local function assignCollisionGroup(character)
     if not character then return end
     
-    character:WaitForChild("HumanoidRootPart", 5)
-    
-    -- Set semua body parts ke collision group "Players"
-    for _, descendant in pairs(character:GetDescendants()) do
-        if descendant:IsA("BasePart") then
-            descendant.CollisionGroup = "Players"
-            -- Backup method: set CanCollide false untuk humanoid parts
-            if descendant.Name ~= "HumanoidRootPart" and descendant.Parent == character then
-                descendant.CanCollide = false
-            end
+    local function setGroup(part)
+        if part:IsA("BasePart") then
+            part.CollisionGroup = COLLISION_GROUP
         end
     end
-    
-    -- Monitor part baru yang ditambahkan (seperti accessories)
+
+    -- Assign ke semua part yang sudah ada
+    for _, part in ipairs(character:GetDescendants()) do
+        setGroup(part)
+    end
+
+    -- Monitor jika ada part baru yang ditambahkan (misal: aksesoris, senjata)
     character.DescendantAdded:Connect(function(descendant)
-        if descendant:IsA("BasePart") then
-            descendant.CollisionGroup = "Players"
-        end
+        -- task.wait() dihapus agar instan dan tidak membuang memori
+        setGroup(descendant)
     end)
 end
 
--- Setup collision groups
+-- Inisialisasi
 setupCollisionGroups()
 
--- Handle player yang sudah ada di game
-for _, player in pairs(Players:GetPlayers()) do
+local function onPlayerAdded(player)
+    player.CharacterAdded:Connect(assignCollisionGroup)
+    -- Jika character sudah ada saat script berjalan
     if player.Character then
-        task.wait(0.1) -- Small delay untuk memastikan character loaded
-        disableCollision(player.Character)
+        assignCollisionGroup(player.Character)
     end
-    
-    -- Handle ketika character respawn
-    player.CharacterAdded:Connect(function(character)
-        task.wait(0.1)
-        disableCollision(character)
-    end)
 end
 
--- Handle player baru yang join
-Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function(character)
-        task.wait(0.1)
-        disableCollision(character)
-    end)
-end)
+Players.PlayerAdded:Connect(onPlayerAdded)
+for _, player in ipairs(Players:GetPlayers()) do
+    onPlayerAdded(player)
+end
 

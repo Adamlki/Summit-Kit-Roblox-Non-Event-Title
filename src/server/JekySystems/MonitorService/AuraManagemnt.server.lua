@@ -70,9 +70,9 @@ end
 
 local function clearPlayerAura(player)
     local character = player.Character
-    if not character then return end
-    
-    removeExistingAuras(character)
+    if character then
+        character:SetAttribute("EquippedAura", "")
+    end
     
     local uid = player.UserId
     if PlayerAuraData[uid] then
@@ -86,114 +86,24 @@ local function applyAuraToPlayer(player, auraName)
     
     if not character:FindFirstChildOfClass("Humanoid") then return false end
     
-    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-    if not humanoidRootPart then return false end
-    
     local auraModel = AuraPack:FindFirstChild(auraName)
     if not auraModel then return false end
     
     clearPlayerAura(player)
     
+    -- [OPTIMASI] Server HANYA mengeset Attribute nama Aura.
+    -- LocalScript (Client) yang akan membaca Attribute ini dan merender Partikelnya secara visual saja.
+    character:SetAttribute("EquippedAura", auraName)
+    
     local uid = player.UserId
-    local clonedComponents = {}
-    local processedParts = {}
-    
-    local bodyParts = {
-    "HumanoidRootPart", "Head",
-    "UpperTorso", "LowerTorso",
-    "RightUpperArm", "RightLowerArm", "RightHand",
-    "LeftUpperArm", "LeftLowerArm", "LeftHand",
-    "RightUpperLeg", "RightLowerLeg", "RightFoot",
-    "LeftUpperLeg", "LeftLowerLeg", "LeftFoot",
-    "Torso", "Right Arm", "Left Arm", "Right Leg", "Left Leg"
-    }
-    
-    for _, partName in ipairs(bodyParts) do
-        local auraPart = auraModel:FindFirstChild(partName)
-        local characterPart = character:FindFirstChild(partName)
-        
-        if auraPart and characterPart and auraPart:IsA("BasePart") then
-            local clone = auraPart:Clone()
-            clone.Name = "Aura_" .. partName
-            clone:SetAttribute("AuraShop", true)
-            clone.Transparency = 1
-            clone.CanCollide = false
-            clone.CanTouch = false
-            clone.Massless = true
-            clone.Anchored = false
-            clone.CFrame = characterPart.CFrame
-            clone.Parent = characterPart
-            
-            local weld = Instance.new("WeldConstraint")
-            weld.Part0 = clone
-            weld.Part1 = characterPart
-            weld.Parent = clone
-            weld:SetAttribute("IsAura", true)
-            
-            table.insert(clonedComponents, clone)
-            table.insert(clonedComponents, weld)
-            
-            processedParts[partName] = true
-        end
+    if not PlayerAuraData[uid] then
+        PlayerAuraData[uid] = {}
     end
     
-    for _, child in ipairs(auraModel:GetChildren()) do
-        if child:IsA("BasePart") and not processedParts[child.Name] then
-            local clone = child:Clone()
-            clone.Name = "Aura_" .. child.Name
-            clone:SetAttribute("AuraShop", true)
-            clone.Transparency = 1
-            clone.CanCollide = false
-            clone.CanTouch = false
-            clone.Massless = true
-            clone.Anchored = false
-            clone.CFrame = humanoidRootPart.CFrame
-            clone.Parent = humanoidRootPart
-            
-            local weld = Instance.new("WeldConstraint")
-            weld.Part0 = clone
-            weld.Part1 = humanoidRootPart
-            weld.Parent = clone
-            weld:SetAttribute("IsAura", true)
-            
-            table.insert(clonedComponents, clone)
-            table.insert(clonedComponents, weld)
-        end
-    end
+    PlayerAuraData[uid].equippedAura = auraName
+    PlayerAuraData[uid].auraComponents = {} -- Dikosongkan karena part fisik sudah dihapus dari Server
     
-    for _, child in ipairs(auraModel:GetChildren()) do
-        if not child:IsA("BasePart") and 
-            not child:IsA("Humanoid") and 
-            not child:IsA("BillboardGui") and 
-            child.Name ~= "HumanoidRootPart" then
-            
-            local clone = child:Clone()
-            clone.Name = "Aura_" .. child.Name
-            clone.Parent = humanoidRootPart
-            
-            if clone:IsA("BasePart") then
-                local weld = Instance.new("WeldConstraint")
-                weld.Part0 = clone
-                weld.Part1 = humanoidRootPart
-                weld.Parent = clone
-            end
-            
-            table.insert(clonedComponents, clone)
-        end
-    end
-    
-    if #clonedComponents > 0 then
-        if not PlayerAuraData[uid] then
-            PlayerAuraData[uid] = {}
-        end
-        
-        PlayerAuraData[uid].auraComponents = clonedComponents
-        PlayerAuraData[uid].equippedAura = auraName
-        
-        return true
-    else
-        return false
-    end
+    return true
 end
 
 -- ============================================

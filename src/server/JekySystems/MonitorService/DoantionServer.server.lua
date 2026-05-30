@@ -2,6 +2,7 @@
 local Players           = game:GetService("Players")
 local MarketplaceService = game:GetService("MarketplaceService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
  
 -- ============================================
 -- DONATION PACKAGES
@@ -65,37 +66,36 @@ local DonationDataStore = DataStoreService:GetOrderedDataStore(JekyDSKeys.Keys.D
 MarketplaceService.ProcessReceipt = function(receiptInfo)
 	local donorPlayer = Players:GetPlayerByUserId(receiptInfo.PlayerId)
 
-	-- Validasi apakah player ada di server
 	if not donorPlayer then
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 
-	-- Validasi apakah product valid
 	local isValid, price = isValidPackage(receiptInfo.ProductId)
 	if not isValid then
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 
-	-- Proses penyimpanan ke OrderedDataStore
+	-- 🛑 TAMBAHKAN PENGECEKAN STUDIO DI SINI 🛑
+	if RunService:IsStudio() then
+		print("[DonationServer] Pembelian TEST di Studio berhasil. (TIDAK DISIMPAN KE LEADERBOARD)")
+		broadcastDonation(donorPlayer, price) -- Tetap broadcast agar kamu bisa ngetes UI notifikasinya
+		return Enum.ProductPurchaseDecision.PurchaseGranted
+	end
+
+	-- Proses penyimpanan ke OrderedDataStore (Ini hanya akan jalan di Live Game)
 	local key = "Player_" .. donorPlayer.UserId
 	local success, err = pcall(function()
-		-- IncrementAsync akan otomatis menambah value jika key sudah ada,
-		-- atau membuat key baru dengan value 'price' jika belum ada.
 		DonationDataStore:IncrementAsync(key, price)
 	end)
 
 	if success then
-		-- Jika berhasil disimpan, broadcast notifikasi dan izinkan purchase
 		broadcastDonation(donorPlayer, price)
 		return Enum.ProductPurchaseDecision.PurchaseGranted
 	else
 		warn("[DonationServer] Gagal menyimpan donasi untuk " .. donorPlayer.Name .. ": " .. tostring(err))
-		-- Jika gagal (misal server Roblox gangguan), jangan selesaikan purchase
-		-- Roblox akan mencoba lagi dalam beberapa saat.
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 end
- 
 -- ============================================
 -- HANDLE PURCHASE REQUEST FROM CLIENT
 -- ============================================

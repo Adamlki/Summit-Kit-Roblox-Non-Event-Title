@@ -66,6 +66,10 @@ local function updateIconVisibility(player)
         return false
     end
     
+    -- [OPTIMASI] Gunakan MaxDistance agar engine Roblox otomatis menyembunyikan BillboardGui
+    -- Ini jauh lebih ringan daripada menghitung (X, Y, Z) / Magnitude di RunService
+    billboard.MaxDistance = 75
+    
     local success = pcall(function()
         -- Hide ALL device icons first
         local deviceIcons = {"Phone", "Tablet", "Pc", "Consol", "Vr", "Unknow"}
