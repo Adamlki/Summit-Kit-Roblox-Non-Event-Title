@@ -255,3 +255,31 @@ game:BindToClose(function()
 		safeSave(id, d)
 	end
 end)
+
+-- PERBAIKAN: Periodic check untuk restore title yang hilang (seperti saat ganti avatar via katalog), 
+-- sistem ini meniru cara kerja OverheadManager agar tidak memakan banyak CPU (mengecek setiap 3 detik).
+task.spawn(function()
+	while true do
+		task.wait(3)
+		for _, p in ipairs(Players:GetPlayers()) do
+			pcall(function()
+				local char = p.Character
+				if char and char.Parent then
+					local head = char:FindFirstChild("Head")
+					if head then
+						-- Cek apakah player seharusnya punya title
+						local d = titleCache[p.UserId]
+						if d and next(d) then
+							-- Kalau BillboardGui hilang dari Head (karena ApplyDescription), pasang lagi
+							local bb1 = head:FindFirstChild("BillboardGui1")
+							local bb2 = head:FindFirstChild("BillboardGui2")
+							if not bb1 or not bb2 then
+								applyTitle(p, d)
+							end
+						end
+					end
+				end
+			end)
+		end
+	end
+end)

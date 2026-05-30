@@ -169,10 +169,13 @@ local function getOrCreateRE(n)
                                                 local hum=char:FindFirstChildOfClass("Humanoid"); if not hum or hum.Health<=0 then return end
                                                 local player=Players:GetPlayerFromCharacter(char); if not player then return end
                                                 local uid=player.UserId
+                                                local now = os.clock()
                                                 if not PlayerSpeedRunState[uid] then
                                                     PlayerSpeedRunState[uid]={Username=player.Name,BestTime=0,IsRunning=false,StartTime=0,HasTouchedStart=false}
+                                                else
+                                                    if PlayerSpeedRunState[uid].IsRunning and (now - PlayerSpeedRunState[uid].StartTime) < 1 then return end
                                                 end
-                                                PlayerSpeedRunState[uid].StartTime=os.clock()
+                                                PlayerSpeedRunState[uid].StartTime=now
                                                 PlayerSpeedRunState[uid].IsRunning=true
                                                 PlayerSpeedRunState[uid].HasTouchedStart=true
                                                 SR_Start:FireClient(player)
