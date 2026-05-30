@@ -47,6 +47,7 @@ local function getOrCreateRE(n)
                         local SR_Internal_GlobalLBUpdate = getOrCreateBE("SR_Internal_GlobalLBUpdate")
                         local SR_Internal_GetServerLB    = getOrCreateBF("SR_Internal_GetServerLB")
                         local SR_Internal_GetGlobalLB    = getOrCreateBF("SR_Internal_GetGlobalLB")
+                        local SR_SyncBoard               = getOrCreateRE("SR_SyncBoard")
                         
                         local PlayerSpeedRunState={}
                         local GlobalLeaderboard={}
@@ -124,6 +125,7 @@ local function getOrCreateRE(n)
                                     end
                                     GlobalLeaderboard=filtered
                                     SR_Internal_GlobalLBUpdate:Fire(filtered)
+                                    pcall(function() SR_SyncBoard:FireAllClients("UpdateBoard", filtered) end)
                                 end
                                 
                                 local function updateServerLeaderboard()
@@ -149,121 +151,8 @@ local function getOrCreateRE(n)
                                 -- ============================================================
                                 -- FIND LB UI
                                 -- ============================================================
-                                local function findLeaderboards()
-                                    local lbs={}; local path=string.split(CONFIG.LEADERBOARD_FOLDER_PATH,"/"); local cur=workspace
-                                    for _,f in ipairs(path) do cur=cur:FindFirstChild(f); if not cur then return {} end end
-                                    for _,model in ipairs(cur:GetChildren()) do
-                                        if not model:IsA("Model") then continue end
-                                        if not string.find(string.lower(model.Name),"speedrun") then continue end
-                                        local board=model:FindFirstChild("Board"); local detik=model:FindFirstChild("Detik")
-                                        if not (board and detik) then continue end
-                                        local bsg=board:FindFirstChild("SurfaceGui"); local dsg=detik:FindFirstChild("SurfaceGui")
-                                        if not (bsg and dsg) then continue end
-                                        table.insert(lbs,{BoardSurfaceGui=bsg,DetikSurfaceGui=dsg,IsGlobal=true,
-                                        UpdateInterval=CONFIG.GLOBAL_UPDATE_INTERVAL,NextUpdateIn=CONFIG.GLOBAL_UPDATE_INTERVAL})
-                                    end
-                                    return lbs
-                                end
-                                
-                                -- ============================================================
-                                -- RENDER — pola GlobalBoard._displayLeaderboard (loop 2x)
-                                -- ============================================================
-                                local function updateLeaderboardUI(lb)
-                                    local init=lb.BoardSurfaceGui:FindFirstChild("Init"); if not init then return end
-                                    local dl=lb.DetikSurfaceGui:FindFirstChild("DetikLabel")
-                                    
-                                    -- Loop 1: preload username (sama GlobalBoard)
-                                    for _,e in ipairs(GlobalLeaderboard) do
-                                        PS.GetUsernameFromUserId(e.UserId)
-                                    end
-                                    
-                                    -- Loop 2: render
-                                    for i=1, CONFIG.MAX_DISPLAY_ENTRIES do
-                                        local tf=init:FindFirstChild("Top"..i); if not tf then continue end
-                                        local ul=tf:FindFirstChild("Username"); local tl=tf:FindFirstChild("Total"); local il=tf:FindFirstChild("ImageLabel")
-                                        if not (ul and tl) then continue end
-                                        local e=GlobalLeaderboard[i]
-                                        if e then
-                                            local name=PS.GetUsernameFromUserId(e.UserId)
-                                            if not name or name=="" then name=e.Username end
-                                            if not name or name=="" then name="Player_"..e.UserId end
-                                            e.Username=name  -- update entry
-                                            ul.Text=i..". "..name
-                                            tl.Text="🏃 "..formatTimeShort(e.BestTime)
-                                            if il and il:IsA("ImageLabel") and e.UserId then
-                                                il.Image="rbxthumb://type=AvatarHeadShot&id="..e.UserId.."&w=150&h=150"
-                                            end
-                                            if name:find("^Player_") then PS.ResolveUsernameBackfill(e.UserId) end
-                                        else
-                                            ul.Text=i..". ---"; tl.Text="🏃 --:--.---"
-                                            if il and il:IsA("ImageLabel") then il.Image="" end
-                                        end
-                                    end
-                                    
-                                    if dl then
-                                        local t=math.max(0,math.floor(lb.NextUpdateIn))
-                                        dl.Text=t>0 and ("Update in "..t.." second"..(t~=1 and "s" or "")) or "Updating..."
-                                    end
-                                end
-                                
-                                local function updateAllUI(lbs)
-                                    for _,lb in ipairs(lbs) do updateLeaderboardUI(lb) end
-                                end
-                                
-                                -- Re-render loop
-                                local function startRerenderLoop(lbs)
-                                    task.spawn(function()
-                                        while true do
-                                            task.wait(3)
-                                            local need=false
-                                            for _,e in ipairs(GlobalLeaderboard) do
-                                                if e.Username:find("^Player_") then
-                                                    local name=PS.GetUsernameFromUserId(e.UserId)
-                                                    if name and name~="" and not name:find("^Player_") then
-                                                        e.Username=name; need=true
-                                                    end
-                                                end
-                                            end
-                                            if need then updateAllUI(lbs) end
-                                        end
-                                    end)
-                                end
-                                
-                                -- ============================================================
-                                -- LISTENERS + LOOPS
-                                -- ============================================================
-                                local function setupRealtimeListeners(lbs)
-                                    SR_Internal_GlobalLBUpdate.Event:Connect(function() updateAllUI(lbs) end)
-                                    end
-                                        
-                                        local function startUpdateLoops(lbs)
-                                            task.spawn(function()
-                                                task.wait(CONFIG.INITIAL_FETCH_DELAY)
-                                                PS.PreloadOnlineUsernames()
-                                                task.wait(0.5)
-                                                updateGlobalLeaderboard()
-                                                updateAllUI(lbs)
-                                            end)
-                                            task.spawn(function()
-                                                while true do
-                                                    task.wait(1)
-                                                    for _,lb in ipairs(lbs) do
-                                                        lb.NextUpdateIn=lb.NextUpdateIn-1
-                                                        if lb.NextUpdateIn<=0 then
-                                                            lb.NextUpdateIn=lb.UpdateInterval
-                                                            updateGlobalLeaderboard()
-                                                            updateAllUI(lbs)
-                                                        end
-                                                        local dl=lb.DetikSurfaceGui and lb.DetikSurfaceGui:FindFirstChild("DetikLabel")
-                                                        if dl then
-                                                            local t=math.max(0,math.floor(lb.NextUpdateIn))
-                                                            dl.Text=t>0 and ("Update in "..t.." second"..(t~=1 and "s" or "")) or "Updating..."
-                                                        end
-                                                    end
-                                                end
-                                            end)
-                                            startRerenderLoop(lbs)
-                                        end
+                              -- UI Rendering dipindahkan ke SpeedrunBoardClient.client.lua
+
                                         
                                         -- ============================================================
                                         -- SPEEDRUN PARTS
@@ -371,15 +260,12 @@ local function getOrCreateRE(n)
                                                                 task.spawn(function() while true do task.wait(CONFIG.GLOBAL_UPDATE_INTERVAL); updateGlobalLeaderboard() end end)
                                                                     task.spawn(function() while true do task.wait(CONFIG.SERVER_UPDATE_INTERVAL); updateServerLeaderboard() end end)
                                                                         
-                                                                        local function initialize()
-                                                                            local lbs=findLeaderboards()
-                                                                            if #lbs>0 then setupRealtimeListeners(lbs); startUpdateLoops(lbs) end
-                                                                            setupSpeedRunParts()
-                                                                            task.wait(CONFIG.INITIAL_FETCH_DELAY)
-                                                                            updateGlobalLeaderboard(); updateServerLeaderboard()
-                                                                        end
+local function initialize()
+    setupSpeedRunParts()
+    task.wait(CONFIG.INITIAL_FETCH_DELAY)
+    updateGlobalLeaderboard(); updateServerLeaderboard()
+end
                                                                         
                                                                         if RunService:IsServer() then
                                                                             task.wait(5); task.spawn(initialize)
                                                                         end
-

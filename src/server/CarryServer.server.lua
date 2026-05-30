@@ -1,6 +1,14 @@
 -- Services
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local PhysicsService = game:GetService("PhysicsService")
+
+-- Setup Collision Group untuk pemain yang digendong agar tembus (tidak nyangkut)
+pcall(function()
+    PhysicsService:RegisterCollisionGroup("CarriedGroup")
+    PhysicsService:CollisionGroupSetCollidable("CarriedGroup", "Default", false)
+    PhysicsService:CollisionGroupSetCollidable("CarriedGroup", "CarriedGroup", false)
+end)
 
 -- Remotes
 local REMOTE_NAME = "CarryRemote"
@@ -42,7 +50,7 @@ local lockMap: {[number]: boolean} = {}
 local detachGuard: {[number]: boolean} = {}
 
 -- Save/Restore
-local savedProps: {[number]: {[BasePart]: {cc:boolean, ml:boolean}}} = {}
+local savedProps: {[number]: {[BasePart]: {cc:boolean, ml:boolean, cg:string}}} = {}
 local savedHum: {[number]: {ws:number, useJP:boolean, jp:number, jh:number, autoRotate:boolean, jumpEnabled:boolean}} = {}
 
 local function getCharHRP(p: Player)
@@ -110,12 +118,15 @@ local function restoreHumState(uid: number, hum: Humanoid)
 end
 
 local function makeCarriedLight(char: Model, userId: number)
-    local map: {[BasePart]: {cc:boolean, ml:boolean}} = {}
+    local map: {[BasePart]: {cc:boolean, ml:boolean, cg:string}} = {}
     for _, d in ipairs(char:GetDescendants()) do
         if d:IsA("BasePart") then
-            map[d] = { cc = d.CanCollide, ml = d.Massless }
+            map[d] = { cc = d.CanCollide, ml = d.Massless, cg = d.CollisionGroup }
             d.CanCollide = false
             d.Massless = true
+            pcall(function()
+                d.CollisionGroup = "CarriedGroup"
+            end)
         end
     end
     savedProps[userId] = map
@@ -126,6 +137,9 @@ local function restoreCarriedLight(userId: number)
         if part and part.Parent then
             part.CanCollide = st.cc
             part.Massless  = st.ml
+            pcall(function()
+                part.CollisionGroup = st.cg or "Default"
+            end)
         end
     end
     savedProps[userId] = nil

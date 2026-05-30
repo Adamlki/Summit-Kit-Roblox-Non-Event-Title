@@ -79,7 +79,7 @@ end
 local function updateTimeDisplay()
     task.spawn(function()
         while true do
-            if currentSound and currentSound.IsPlaying and DetikLagu then
+            if isFrameOpen and currentSound and currentSound.IsPlaying and DetikLagu then
                 local cur = currentSound.TimePosition
                 local tot = currentSound.TimeLength
                 DetikLagu.Text = string.format(
@@ -87,10 +87,10 @@ local function updateTimeDisplay()
                 math.floor(cur / 60), math.floor(cur % 60),
                 math.floor(tot / 60), math.floor(tot % 60)
                 )
-            elseif DetikLagu then
+            elseif isFrameOpen and DetikLagu then
                 DetikLagu.Text = "00:00 / 00:00"
             end
-            task.wait(0.5)
+            task.wait(1)
         end
     end)
 end

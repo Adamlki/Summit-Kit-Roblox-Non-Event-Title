@@ -1,8 +1,8 @@
 local RS = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 local DSS = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
+local CollectionService = game:GetService("CollectionService")
 
 local titleStore = DSS:GetDataStore("TitleStore_V3_Final")
 local ApplyEvent = RS:FindFirstChild("ApplyCustomTitle") or Instance.new("RemoteEvent")
@@ -28,22 +28,15 @@ local SOLIDS = {
 local ANIMS = {"Gradient360", "LeftRight", "Diagonal", "Wave", "Pulse"}
 
 local titleCache = {}
-local activeAnims = {}
 
 local function clearAnim(lbl)
 	if not lbl then return end
-	for i = #activeAnims, 1, -1 do
-		local rec = activeAnims[i]
-		if rec and rec[1] == lbl then
-			if rec[2] then
-				pcall(function() rec[2]:Disconnect() end)
-			end
-			table.remove(activeAnims, i)
-		end
-	end
-	if lbl and lbl.Parent then
+	lbl:SetAttribute("TitleAnimType", nil)
+	CollectionService:RemoveTag(lbl, "AnimatedTitleLabel")
+	
+	if lbl.Parent then
 		for _, g in pairs(lbl:GetChildren()) do
-			if g and g:IsA("UIGradient") then
+			if g:IsA("UIGradient") then
 				pcall(function() g:Destroy() end)
 			end
 		end
@@ -64,53 +57,11 @@ local function applyAnim(lbl, animType, colors)
 	clearAnim(lbl)
 
 	local grad = Instance.new("UIGradient")
-	grad.Parent = lbl
 	grad.Color = buildSeq(colors)
+	grad.Parent = lbl
 
-	local offset, dir, rotation = 0, 1, 0
-
-	local conn
-	conn = RunService.Heartbeat:Connect(function(dt)
-		if not lbl or not lbl.Parent or not grad or not grad.Parent then
-			if conn then 
-				pcall(function() conn:Disconnect() end) 
-			end
-			-- PERBAIKAN: Bersihkan cache tabel animasi agar tidak memory leak
-			for i = #activeAnims, 1, -1 do
-				if activeAnims[i] and activeAnims[i][1] == lbl then
-					table.remove(activeAnims, i)
-				end
-			end
-			return
-		end
-
-		pcall(function()
-			if animType == "Gradient360" then
-				rotation = (rotation + dt * 60) % 360
-				grad.Rotation = rotation
-			elseif animType == "LeftRight" then
-				offset = offset + dt * 0.5 * dir
-				if offset >= 1 then offset, dir = 1, -1
-				elseif offset <= -1 then offset, dir = -1, 1 end
-				grad.Offset = Vector2.new(offset, 0)
-			elseif animType == "Diagonal" then
-				offset = offset + dt * 0.4
-				if offset >= 2 then offset = -1 end
-				grad.Offset = Vector2.new(offset, offset)
-			elseif animType == "Wave" then
-				offset = offset + dt * 0.6
-				local wave = math.sin(offset * math.pi * 2)
-				grad.Offset = Vector2.new(wave, 0)
-			elseif animType == "Pulse" then
-				offset = offset + dt * 0.8 * dir
-				if offset >= 1 then offset, dir = 1, -1
-				elseif offset <= -1 then offset, dir = -1, 1 end
-				grad.Offset = Vector2.new(offset, 0)
-			end
-		end)
-	end)
-
-	table.insert(activeAnims, {lbl, conn})
+	lbl:SetAttribute("TitleAnimType", animType)
+	CollectionService:AddTag(lbl, "AnimatedTitleLabel")
 end
 
 local function applySolid(lbl, color)

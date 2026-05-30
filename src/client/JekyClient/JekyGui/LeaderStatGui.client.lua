@@ -30,49 +30,25 @@ local Template        = ScrollingFrame:WaitForChild("Frame", 5)
 Template.Visible = false
  
 -- ============================================================
--- BLOCK / UNBLOCK LEADERBOARD ROBLOX
+-- DISABLE LEADERBOARD ROBLOX & USER INPUT SERVICE
 -- ============================================================
-local function setRobloxLeaderboard(enabled)
-    -- Pakai pcall karena bisa gagal di Studio
+local UserInputService = game:GetService("UserInputService")
+
+local function disableRobloxLeaderboard()
     pcall(function()
-        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, enabled)
+        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
     end)
 end
  
--- Pastikan leaderboard Roblox aktif dulu saat script load
-setRobloxLeaderboard(true)
- 
--- Juga blok saat tombol Tab ditekan manual oleh player (Roblox buka leaderboard via Tab)
--- Kita override dengan memantau Visible ListPlayer
-local function syncLeaderboard()
-    -- Selama panel kita terbuka, blok leaderboard Roblox terus
-    -- (Roblox kadang re-enable otomatis saat Tab ditekan)
-    if ListPlayer.Visible then
-        setRobloxLeaderboard(false)
+-- Matikan leaderboard bawaan Roblox secara permanen
+disableRobloxLeaderboard()
+
+-- Pastikan selalu mati (antisipasi jika Roblox otomatis menyalakannya kembali)
+task.spawn(function()
+    while task.wait(2) do
+        disableRobloxLeaderboard()
     end
-end
- 
--- Jalankan sync setiap frame hanya saat panel terbuka
-local heartbeatConn = nil
- 
-local function startLeaderboardBlock()
-    if heartbeatConn then return end
-    setRobloxLeaderboard(false)
-    -- Pakai heartbeat untuk mencegah Roblox re-enable via Tab
-    heartbeatConn = game:GetService("RunService").Heartbeat:Connect(function()
-        pcall(function()
-            StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
-        end)
-    end)
-end
- 
-local function stopLeaderboardBlock()
-    if heartbeatConn then
-        heartbeatConn:Disconnect()
-        heartbeatConn = nil
-    end
-    setRobloxLeaderboard(true)
-end
+end)
  
 -- ============================================================
 -- REMOTE EVENTS
@@ -482,26 +458,36 @@ end)
  
 -- ============================================================
 -- TOGGLE
--- FIX: Blok leaderboard Roblox saat panel dibuka,
---      pulihkan saat ditutup
 -- ============================================================
 local isOpen = false
  
 local function openList()
     isOpen = true
     ListPlayer.Visible = true
-    startLeaderboardBlock()   -- blok leaderboard Roblox + Tab
     rebuildAll(true)
 end
  
 local function closeList()
     isOpen = false
     ListPlayer.Visible = false
-    stopLeaderboardBlock()    -- kembalikan leaderboard Roblox
 end
  
 ListButton.MouseButton1Click:Connect(function()
     if isOpen then closeList() else openList() end
+end)
+
+-- Buka/Tutup menggunakan tombol Tab
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    -- Jika player sedang mengetik di chat, abaikan input
+    if gameProcessed then return end
+    
+    if input.KeyCode == Enum.KeyCode.Tab then
+        if isOpen then 
+            closeList() 
+        else 
+            openList() 
+        end
+    end
 end)
  
 -- ============================================================
