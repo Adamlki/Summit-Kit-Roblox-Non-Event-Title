@@ -348,6 +348,11 @@ local function safeLoadCharacter(player)
         PlayerRespawnLocation[uid]  = "BC"
         PlayerCharacterState[uid]   = "alive"
         PlayerBCNotified[uid]       = nil
+        PlayerLastTouch[uid]        = 0
+        
+        if player.Character then
+            player.Character:SetAttribute("LastCPTouch", 0)
+        end
         
         updateCheckpoint(player, "BC", false)
         CP_PartColorUpdate:FireClient(player, nil, "reset")

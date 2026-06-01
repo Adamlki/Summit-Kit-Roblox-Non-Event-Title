@@ -16,6 +16,12 @@ clickSound.Parent = SoundService
 -- Fungsi untuk memberikan efek suara pada sebuah tombol
 local function applySound(element)
 	if element:IsA("TextButton") or element:IsA("ImageButton") then
+		-- Abaikan GUI bawaan Roblox seperti TouchGui (tombol jump, joystick, dll)
+		local screenGui = element:FindFirstAncestorWhichIsA("ScreenGui")
+		if screenGui and screenGui.Name == "TouchGui" then
+			return
+		end
+		
 		element.MouseEnter:Connect(function()
 			hoverSound:Play()
 		end)
