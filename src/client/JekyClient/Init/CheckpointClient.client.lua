@@ -138,8 +138,13 @@ local function showNotif(checkpointId, summitValue, oldTotal, newTotal)
     
     cancelNotif()
     
+    NotifLabel.TextColor3 = Color3.new(1, 1, 1)
     setLabelAlpha(NotifLabel, 1)
-    if AngkaLabel then setLabelAlpha(AngkaLabel, 1); AngkaLabel.Visible = false end
+    if AngkaLabel then 
+        AngkaLabel.TextColor3 = Color3.new(1, 1, 1)
+        setLabelAlpha(AngkaLabel, 1)
+        AngkaLabel.Visible = false 
+    end
     
     local isSummitType = (checkpointId == "Summit" or checkpointId == "ApexSummit")
     local showAngka    = true
@@ -424,10 +429,12 @@ local function playSound(soundId)
                                 if not NotifFrame or not NotifLabel then return end
                                 cancelNotif()
                                 NotifLabel.Text = "CP TERLEWAT!"
+                                NotifLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
                                 setLabelAlpha(NotifLabel, 1)
                                 if AngkaLabel then
                                     -- CP terlewat tetap pakai Romawi
                                     AngkaLabel.Text    = toRoman(expectedCP)
+                                    AngkaLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
                                     AngkaLabel.Visible = true
                                     setLabelAlpha(AngkaLabel, 1)
                                 end
@@ -463,6 +470,59 @@ local function playSound(soundId)
                                 -- ============================================================
                                 -- TELEPORT SYSTEM (CLIENT-SIDED TO PREVENT LAG BUGS)
                                 -- ============================================================
+                                
+local function getClientTeleportTarget(checkpointId)
+    if not CheckpointFolder then return nil end
+    
+    local modelName = checkpointId
+    if checkpointId == "Summit" then modelName = "SUMMIT"
+    elseif checkpointId == "ApexSummit" then modelName = "BIGSUMMIT" end
+    
+    local model = CheckpointFolder:FindFirstChild(modelName)
+    if not model then
+        if checkpointId == "BC" then
+            return workspace:FindFirstChild("BC_Fallback")
+        end
+        return nil
+    end
+    
+    if checkpointId ~= "Summit" and checkpointId ~= "ApexSummit" then
+        local dest = model:FindFirstChild("Destinasi")
+        if dest then return dest end
+    end
+    
+    return model:FindFirstChildOfClass("SpawnLocation")
+end
+
+local function doClientTeleport(checkpointId)
+    local target = getClientTeleportTarget(checkpointId)
+    if not target then return false end
+    
+    local character = LocalPlayer.Character
+    if not character then return false end
+    
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return false end
+    
+    local range = 5
+    local offsetY = 5
+    local spawnPos = target.Position + Vector3.new(
+        math.random(-range, range),
+        offsetY,
+        math.random(-range, range)
+    )
+    
+    hrp.CFrame = CFrame.new(spawnPos)
+    hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+    hrp.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+    
+    local hum = character:FindFirstChildOfClass("Humanoid")
+    if hum and hum.Health > 0 then
+        hum.Health = hum.MaxHealth
+    end
+    
+    return true
+end
                                 
                                 local function setupTeleportSystem()
                                     local summitkitFolder = workspace:WaitForChild("AllPartSummitkitJeky", 999)
@@ -500,9 +560,11 @@ local function onTeleportTouch(tpPart, hit)
     end
     
     if isBackBC then
+        doClientTeleport("BC")
         local req = JekyEvents:FindFirstChild("CP_RequestResetToBC")
         if req then req:FireServer() end
     else
+        doClientTeleport(CurrentCheckpoint)
         local req = JekyEvents:FindFirstChild("CP_RequestTeleportToLastCP")
         if req then req:FireServer() end
     end

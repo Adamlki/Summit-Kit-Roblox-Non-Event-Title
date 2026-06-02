@@ -317,6 +317,15 @@ local function safeLoadCharacter(player)
         if not PlayerVisited[uid] then PlayerVisited[uid] = {} end
         PlayerVisited[uid][newCheckpoint] = true
         
+        -- Backfill previous checkpoints to prevent missing CP bugs at Summit
+        local cpNum = tonumber(string.match(newCheckpoint, "^CP(%d+)$"))
+        if cpNum then
+            for i = 1, cpNum - 1 do
+                PlayerVisited[uid]["CP" .. i] = true
+            end
+        end
+        PlayerVisited[uid]["BC"] = true
+        
         local spawnLoc = getSpawnLocation(newCheckpoint)
         if spawnLoc then player.RespawnLocation = spawnLoc end
         
@@ -389,14 +398,14 @@ end
         return maxCP
     end
     
-    local function hasCompletedAllCheckpoints(uid)
-        if not PlayerVisited[uid] then return false end
+    local function getMissingCheckpoint(uid)
+        if not PlayerVisited[uid] then return 1 end
         local highest = getHighestCPNumber()
-        if highest == 0 then return true end
+        if highest == 0 then return nil end
         for i = 1, highest do
-            if not PlayerVisited[uid]["CP" .. i] then return false end
+            if not PlayerVisited[uid]["CP" .. i] then return i end
         end
-        return true
+        return nil
     end
     
     local function awardSummit(player, summitType)
@@ -545,13 +554,13 @@ end
     if not PlayerRoundState[uid] then return end
     if not PlayerVisited[uid].BC then return end
     
-    if not JekyConfig:GetSkipCheckpointMode() and not hasCompletedAllCheckpoints(uid) then 
+    local missingCP = not JekyConfig:GetSkipCheckpointMode() and getMissingCheckpoint(uid) or nil
+    if missingCP then 
         -- TAMBAHKAN WARNING AGAR TIDAK SILENT FAILURE
-        warn(player.Name .. " mencoba Summit tetapi belum menginjak semua CP!")
+        warn(player.Name .. " mencoba Summit tetapi belum menginjak semua CP! Missing: CP" .. missingCP)
         
         -- Beritahu UI Client bahwa mereka melewatkan CP
-        local highestCP = getHighestCPNumber()
-        CP_SkippedWarning:FireClient(player, highestCP) 
+        CP_SkippedWarning:FireClient(player, missingCP) 
         
         -- Opsional: Teleport mereka ke CP tertinggi yang sudah mereka injak
         return 
@@ -600,12 +609,6 @@ end
                                 CP_PartColorUpdate:FireClient(player, checkpointId, "visited")
                             elseif cpNum > expectedCP then
                                 CP_SkippedWarning:FireClient(player, expectedCP)
-                                task.spawn(function()
-                                    task.wait(0.1)
-                                    if player.Character then
-                                        teleportToCheckpoint(player.Character, getCPString(getMinCPInGroup(player)))
-                                    end
-                                end)
                             end
                         end
                     end
@@ -773,6 +776,15 @@ end
                                                                                     PlayerVisited[uid]         = { BC = true }
                                                                                     PlayerRespawnLocation[uid] = savedCP
                                                                                 else
+                                                                                    -- Backfill missing CPs from saved data
+                                                                                    local savedNum = tonumber(string.match(savedCP, "^CP(%d+)$"))
+                                                                                    if savedNum then
+                                                                                        for i = 1, savedNum do
+                                                                                            visitedData["CP" .. i] = true
+                                                                                        end
+                                                                                    end
+                                                                                    visitedData["BC"] = true
+                                                                                    
                                                                                     cpLS.Value                 = savedCP
                                                                                     PlayerRoundState[uid]      = true
                                                                                     PlayerVisited[uid]         = visitedData

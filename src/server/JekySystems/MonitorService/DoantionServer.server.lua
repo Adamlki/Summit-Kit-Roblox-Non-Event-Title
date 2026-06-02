@@ -8,7 +8,16 @@ local RunService = game:GetService("RunService")
 -- DONATION PACKAGES
 -- ============================================
 local DONATION_PACKAGES = {
-	{id = 3598419185, price = 8},
+    {id = 3534865193, price = 5},    -- Donation 1
+    {id = 3534866153, price = 10},   -- Donation 2
+    {id = 3534866169, price = 20},   -- Donation 3
+    {id = 3534866168, price = 50},   -- Donation 4
+    {id = 3534866165, price = 100},  -- Donation 5
+    {id = 3534866167, price = 250},  -- Donation 6
+    {id = 3534866176, price = 500},  -- Donation 7
+    {id = 3534866177, price = 1000}, -- Donation 8
+    {id = 3534866166, price = 2000}, -- Donation 9
+    {id = 3534866149, price = 4000}, -- Donation 10
 }
  
 -- ============================================
