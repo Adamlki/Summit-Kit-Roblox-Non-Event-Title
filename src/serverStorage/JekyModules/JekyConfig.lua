@@ -40,6 +40,7 @@ game:GetService("Players").RespawnTime = 2
 function JekyConfig:LoadValues()
     self.SUMMIT_REWARDS.Summit     = JekyGlobalData:GetSummitValue()
     self.SUMMIT_REWARDS.ApexSummit = JekyGlobalData:GetApexValue()
+    self.SKIP_CHECKPOINT           = JekyGlobalData:GetSkipCheckpointMode()
 end
  
 function JekyConfig:SetSummitValue(value)
@@ -69,7 +70,7 @@ end
 function JekyConfig:SetSkipCheckpointMode(skipMode)
     if type(skipMode) == "boolean" then
         self.SKIP_CHECKPOINT = skipMode
-        return true
+        return JekyGlobalData:SetSkipCheckpointMode(skipMode)
     end
     return false
 end

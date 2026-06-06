@@ -133,6 +133,14 @@ end
 -- COMMAND HANDLER
 -- ============================================================
 local CHAT_TOPIC = "SummitGlobalChat"
+local CONFIG_TOPIC = "JekyConfigUpdate"
+
+pcall(function()
+    MessagingService:SubscribeAsync(CONFIG_TOPIC, function(message)
+        -- When config updates on another server, we reload our config values
+        JekyConfig:LoadValues()
+    end)
+end)
  
 AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
     if not sender or not sender.Parent then return end
@@ -381,6 +389,7 @@ AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
                                 JekyConfig:SetSummitValue(v)
                                 task.wait(0.5)
                                 JekyConfig:LoadValues()
+                                pcall(function() MessagingService:PublishAsync(CONFIG_TOPIC, "Update") end)
                                 reply(true, "Summit reward set to " .. v)
                                 return
                             end
@@ -395,6 +404,7 @@ AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
                                 JekyConfig:SetApexValue(v)
                                 task.wait(0.5)
                                 JekyConfig:LoadValues()
+                                pcall(function() MessagingService:PublishAsync(CONFIG_TOPIC, "Update") end)
                                 reply(true, "Apex reward set to " .. v)
                                 return
                             end
@@ -412,6 +422,9 @@ AdminPanel_Command.OnServerEvent:Connect(function(sender, cmdName, args)
                                     else reply(false, "Invalid skip mode value."); return end
                                     end
                                         JekyConfig:SetSkipCheckpointMode(mode)
+                                        task.wait(0.5)
+                                        JekyConfig:LoadValues()
+                                        pcall(function() MessagingService:PublishAsync(CONFIG_TOPIC, "Update") end)
                                         reply(true, "Skip Checkpoint = " .. tostring(mode))
                                         return
                                     end
