@@ -1,3 +1,7 @@
+local DEBUG_MODE = false
+local function dPrint(...) if DEBUG_MODE then dPrint(...) end end
+local function dWarn(...) if DEBUG_MODE then dWarn(...) end end
+
 local RS = game:GetService("ReplicatedStorage")
 local DSS = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
@@ -11,7 +15,6 @@ ApplyEvent.Name = "ApplyCustomTitle"
 ApplyEvent.Parent = RS
 
 local TitleGiver = RS:WaitForChild("TitleGiver")
-
 
 
 -- Memanggil module JekyConfig untuk cek akses Admin
@@ -175,17 +178,22 @@ local function applyTitle(player, data)
 	end
 end
 
+local rateLimits = {}
+local function checkRateLimit(userId, key, limit)
+	local id = userId .. "_" .. key
+	local now = os.clock()
+	if rateLimits[id] and (now - rateLimits[id]) < limit then return false end
+	rateLimits[id] = now
+	return true
+end
+
 ApplyEvent.OnServerEvent:Connect(function(sender, data)
 	if type(data) ~= "table" then return end
-
-	-- Validasi keamanan: HANYA Admin yang bisa menggunakan Remote ini
-	local senderRole = sender:GetAttribute("RoleTitle")
-	if not JekyConfig:HasCommandAccess(senderRole, "_AddRole") then
-		warn("Exploit terdeteksi: " .. sender.Name .. " mencoba mengakses Title Admin!")
-		return
-	end
+	if not checkRateLimit(sender.UserId, "ApplyTitle", 2) then return end
 
 	if data.RequestData then
+		local senderRole = sender:GetAttribute("RoleTitle")
+		if not JekyConfig:HasCommandAccess(senderRole, "_AddRole") then return end
 		local target = Players:FindFirstChild(data.TargetName) or sender
 		local d = loadTitle(target.UserId)
 		ApplyEvent:FireClient(sender, {LoadedData = d, Target = target.Name})
@@ -193,6 +201,13 @@ ApplyEvent.OnServerEvent:Connect(function(sender, data)
 	end
 
 	local target = Players:FindFirstChild(data.Target) or sender
+
+	-- PERBAIKAN: Hanya admin yang bisa modify title
+	local senderRole = sender:GetAttribute("RoleTitle")
+	if not JekyConfig:HasCommandAccess(senderRole, "_AddRole") then
+		dWarn("Exploit terdeteksi: " .. sender.Name .. " mencoba memodifikasi title milik " .. target.Name)
+		return
+	end
 
 	if data.ClearLine then
 		local idx = data.ClearLine
@@ -220,7 +235,6 @@ ApplyEvent.OnServerEvent:Connect(function(sender, data)
 end)
 
 
-
 local function autoLoad(p)
 	local d = loadTitle(p.UserId)
 	if d and next(d) then
@@ -239,6 +253,14 @@ Players.PlayerAdded:Connect(function(p)
 		task.wait(0.5)
 		autoLoad(p)
 	end
+end)
+
+Players.PlayerRemoving:Connect(function(p)
+	titleCache[p.UserId] = nil
+	-- Bersihkan rateLimits cache juga
+	rateLimits[p.UserId .. "_ApplyTitle"] = nil
+	rateLimits[p.UserId .. "_TitleClaim"] = nil
+	rateLimits[p.UserId .. "_TitlePreview"] = nil
 end)
 
 for _, p in ipairs(Players:GetPlayers()) do
@@ -284,4 +306,4 @@ task.spawn(function()
 			end)
 		end
 	end
-end)
+end)

@@ -16,14 +16,16 @@ local MAX_ITEMS = 10
 local EMOTE_ID = "rbxassetid://140349022227594"
 
 local DEBUG_MODE = false -- SET KE 'false' JIKA GAME SUDAH RILIS AGAR OUTPUT TIDAK SPAM
+local function dPrint(...) if DEBUG_MODE then dPrint(...) end end
+local function dWarn(...) if DEBUG_MODE then dWarn(...) end end
 
 local function debugLog(tag, message, isError)
 	if not DEBUG_MODE then return end
 	local prefix = "[DonationLB | " .. tag .. "] "
 	if isError then
-		warn(prefix .. tostring(message))
+		dWarn(prefix .. tostring(message))
 	else
-		print(prefix .. tostring(message))
+		dPrint(prefix .. tostring(message))
 	end
 end
 
@@ -183,30 +185,43 @@ local function updateStatue(rank, userId, displayName, totalDonated)
 			end
 
 			local isPlaying = false
+			local existingTrack = nil
+
 			for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
-				if track.Animation.AnimationId == EMOTE_ID then
+				if track.Animation and track.Animation.AnimationId == EMOTE_ID then
+					existingTrack = track
 					isPlaying = true
 					break
 				end
 			end
 
+
 			if not isPlaying then
+				-- Stop other tracks
 				for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
-					track:Stop()
+					if track ~= existingTrack then
+						track:Stop()
+					end
 				end
 
 				debugLog("STATUE", "Memutar animasi emote untuk Top " .. rank)
-				local anim = Instance.new("Animation")
-				anim.AnimationId = EMOTE_ID
+				
+				if existingTrack then
+					existingTrack.Looped = true
+					existingTrack:Play()
+				else
+					local anim = Instance.new("Animation")
+					anim.AnimationId = EMOTE_ID
 
-				local successAnim, errAnim = pcall(function()
-					local track = animator:LoadAnimation(anim)
-					track.Looped = true
-					track:Play()
-				end)
+					local successAnim, errAnim = pcall(function()
+						local track = animator:LoadAnimation(anim)
+						track.Looped = true
+						track:Play()
+					end)
 
-				if not successAnim then
-					debugLog("STATUE", "Gagal memutar animasi: " .. tostring(errAnim), true)
+					if not successAnim then
+						debugLog("STATUE", "Gagal memutar animasi: " .. tostring(errAnim), true)
+					end
 				end
 			end
 		end)

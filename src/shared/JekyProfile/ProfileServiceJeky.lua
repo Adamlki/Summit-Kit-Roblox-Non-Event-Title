@@ -1,3 +1,7 @@
+local DEBUG_MODE = false
+local function dPrint(...) if DEBUG_MODE then dPrint(...) end end
+local function dWarn(...) if DEBUG_MODE then dWarn(...) end end
+
 -- ReplicatedStorage/JekyProfile/ProfileServiceJeky
 -- v8 — fix GlobalLB stale data + reset support
  
@@ -94,21 +98,21 @@ end
 local function safeSet(store, key, value)
     if not waitForWriteBudget(10) then return false end
     local ok, err = pcall(function() store:SetAsync(key, value) end)
-        if not ok then warn("[PS] safeSet:", err) end
+        if not ok then dWarn("[PS] safeSet:", err) end
         return ok
     end
     
     local function safeGet(store, key)
         if not waitForReadBudget(10) then return false, nil end
         local ok, r = pcall(function() return store:GetAsync(key) end)
-            if not ok then warn("[PS] safeGet:", r) end
+            if not ok then dWarn("[PS] safeGet:", r) end
             return ok, ok and r or nil
         end
         
         local function safeUpdate(store, key, fn)
             if not waitForWriteBudget(15) then return false, nil end
             local ok, r = pcall(function() return store:UpdateAsync(key, fn) end)
-                if not ok then warn("[PS] safeUpdate:", r) end
+                if not ok then dWarn("[PS] safeUpdate:", r) end
                 return ok, ok and r or nil
             end
             
@@ -118,26 +122,44 @@ local function safeSet(store, key, value)
             local usernameCache      = {}
             local usernameTimestamps = {}
             local usernameWriteLast  = {}
-            local usernameWriteBusy  = {}
             local usernameResolving  = {}
             
+            -- Antrean penyimpanan agar tidak spam DataStore Queue
+            local usernameSaveQueue = {}
+            local isUsernameSaverRunning = false
+
+            local function startUsernameSaver()
+                if isUsernameSaverRunning then return end
+                isUsernameSaverRunning = true
+                task.spawn(function()
+                    while true do
+                        local nextUserId, nextName = next(usernameSaveQueue)
+                        if nextUserId then
+                            usernameSaveQueue[nextUserId] = nil
+                            local store = getStore(DSKeys.Profile.."_UserCache")
+                            if store and waitForWriteBudget(15) then
+                                pcall(function() store:SetAsync("U_"..nextUserId, nextName) end)
+                                usernameWriteLast[nextUserId] = os.time()
+                            end
+                            task.wait(2) -- Beri jeda 2 detik antar request agar tidak memicu peringatan kuning
+                        else
+                            task.wait(1)
+                        end
+                    end
+                end)
+            end
+
             local function _persistUsername(userId, name)
                 if not userId or not name or name == "" then return end
-                if usernameWriteBusy[userId] then return end
                 local now = os.time()
                 if usernameWriteLast[userId] and (now - usernameWriteLast[userId]) < USERNAME_WRITE_COOLDOWN then
                     return
                 end
-                usernameWriteBusy[userId] = true
-                task.spawn(function()
-                    local store = getStore(DSKeys.Profile.."_UserCache") -- Menggunakan prefix Profile agar unik
-                    if store and waitForWriteBudget(15) then
-                        pcall(function() store:SetAsync("U_"..userId, name) end)
-                            usernameWriteLast[userId] = os.time()
-                        end
-                        usernameWriteBusy[userId] = nil
-                    end)
-                end
+                
+                -- Masukkan ke antrean dan jalankan prosesor antrean
+                usernameSaveQueue[userId] = name
+                startUsernameSaver()
+            end
                 
                 function PS.CacheUsername(userId, name)
                     if not userId or not name or name == "" then return end
@@ -328,7 +350,7 @@ local function safeSet(store, key, value)
                                 end)
                                 if ok and data then result = data; break end
                                 if ok and not data then
-                                    warn("[PS] Session conflict userId:", userId, "attempt", attempt)
+                                    dWarn("[PS] Session conflict userId:", userId, "attempt", attempt)
                                     task.wait(RETRY_WAIT * attempt)
                                 else
                                     task.wait(RETRY_WAIT)
@@ -336,7 +358,7 @@ local function safeSet(store, key, value)
                             end
                             
                             if not result then
-                                warn("[PS] GAGAL load profile userId:", userId)
+                                dWarn("[PS] GAGAL load profile userId:", userId)
                                 return nil
                             end
                             
@@ -412,7 +434,7 @@ local function safeSet(store, key, value)
                                             profiles[userId] = nil
                                         end
                                     else
-                                        warn("[PS] Save error userId:", userId, err)
+                                        dWarn("[PS] Save error userId:", userId, err)
                                     end
                                     return ok
                                 end
